@@ -1,12 +1,17 @@
 defmodule DeliveryLocationService.LocationServer do
-  #TODO add validations
+  @moduledoc """
+  A GenServer that holds state for a driver with its location, assigned restaurant and timestamps.
+  It uses %Location{} and is supervised by LocationSupervisor
+  It also makes use of :ets in case the process crashes it can be called back from the in-memory db.
+  Since the state is ephemeral, :ets is not really needed and can be removed if needed to scale but it was a nice addition.
+  """
   #TODO add the corresponding hours to set UTC to mx's timezone
 
   use GenServer
   alias DeliveryLocationService.Location
   require Logger
 
-  @timeout :timer.minutes(15)
+  #@timeout :timer.minutes(15)
 
 
   def create(driver_id) do

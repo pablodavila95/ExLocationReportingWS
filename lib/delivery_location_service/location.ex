@@ -1,4 +1,7 @@
 defmodule DeliveryLocationService.Location do
+  @moduledoc """
+  Defines the Location struct and its methods to update it. It's being used by the LocationServer.
+  """
   #TODO add a new key for the current state of the driver
   #TODO give the coordinates its own struct
   #TODO add validations
@@ -19,11 +22,12 @@ defmodule DeliveryLocationService.Location do
 
   def is_owned_by_restaurant?(%Location{} = location, restaurant_id) when is_nil(restaurant_id) == false do
     {:ok, location_data_rid} = Map.fetch(location, :restaurant_id)
-    cond do
-      location_data_rid == restaurant_id ->
-        true
-      location_data_rid == nil ->
+    if location_data_rid == restaurant_id do
+      true
+    else
+      if location_data_rid == nil do
         false
+      end
     end
   end
 end

@@ -1,4 +1,7 @@
 defmodule DeliveryLocationService.LocationsHelper do
+  @moduledoc """
+  Provides a set of helper functions to work with the Location GenServer's state.
+  """
   alias DeliveryLocationService.Location
   alias DeliveryLocationService.LocationSupervisor
 

@@ -1,4 +1,8 @@
 defmodule DeliveryLocationServiceWeb.DriverChannel do
+  @moduledoc """
+  Provides the Channel for a driver to continuosly report its location.
+  It also notifies the admin and any subscribed restaurant (it also forces subscription when accepting orders or the opposite)
+  """
   use DeliveryLocationServiceWeb, :channel
   alias DeliveryLocationService.LocationServer
   alias DeliveryLocationServiceWeb.Endpoint
@@ -84,7 +88,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     end
   end
 
-  def handle_in( "ping", _params, socket ) do
+  def handle_in("ping", _params, socket) do
     push(socket, "pong", %{msg: "pong!"})
     {:reply, :ok, socket}
   end

@@ -1,4 +1,8 @@
 defmodule DeliveryLocationServiceWeb.AdminChannel do
+  @moduledoc """
+  There is only one Channel in this module. admin:locations, since all admins receive the same information.
+  Any update from the drivers gets sent to the channel.
+  """
   use DeliveryLocationServiceWeb, :channel
   alias DeliveryLocationService.LocationsHelper
 
@@ -9,6 +13,7 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
 
   def handle_info({:after_join}, socket) do
     LocationsHelper.get_orders_for_all()
+    #TODO check credo's warning regarding unused values
     |> Enum.map(fn driver_data -> push(socket, "driver_update", Map.from_struct(driver_data)) end)
     {:noreply, socket}
   end

@@ -1,4 +1,7 @@
 defmodule DeliveryLocationServiceWeb.Telemetry do
+  @moduledoc """
+  Phoenix's telemetry module
+  """
   use Supervisor
   import Telemetry.Metrics
 

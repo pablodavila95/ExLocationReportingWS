@@ -1,4 +1,7 @@
 defmodule DeliveryLocationService.LocationSupervisor do
+  @moduledoc """
+  Supervises the LocationServer
+  """
   use DynamicSupervisor
 
   alias DeliveryLocationService.LocationServer
