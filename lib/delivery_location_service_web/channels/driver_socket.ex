@@ -16,12 +16,12 @@ defmodule DeliveryLocationServiceWeb.DriverSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   @impl true
-  def connect(%{"token" => token}, socket) do
+  def connect(%{"driver_id" => driver_id, "vsn" => _}, socket) do
     #TODO send the token to the Java backend to validate
     #TODO save the validated tokens in a ets table so I don't need to check each time
     #This will be obtained from the Java backend after sending the token
-    driver_id = 1
-    {:ok, assign(socket, :driver_id, driver_id)}
+    socket = assign(socket, :driver_id, driver_id)
+    {:ok, socket}
   end
 
   def connect(_params, _socket), do: :error

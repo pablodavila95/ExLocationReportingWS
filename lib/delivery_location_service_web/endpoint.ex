@@ -14,13 +14,14 @@ defmodule DeliveryLocationServiceWeb.Endpoint do
     websocket: true,
     longpoll: false
 
-  socket "/socket/admin", DeliveryLocationServiceWeb.AdminSocket,
+
+  socket "/socket/restaurant", DeliveryLocationServiceWeb.RestaurantSocket,
     websocket: true,
     longpoll: false
 
-  #socket "/socket/restaurant", DeliveryLocationServiceWeb.RestaurantSocket,
-   # websocket: true,
-    #longpoll: false
+  socket "/socket/admin", DeliveryLocationServiceWeb.AdminSocket,
+    websocket: true,
+    longpoll: false
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 

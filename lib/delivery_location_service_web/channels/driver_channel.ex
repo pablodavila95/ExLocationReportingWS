@@ -1,53 +1,103 @@
 defmodule DeliveryLocationServiceWeb.DriverChannel do
   use DeliveryLocationServiceWeb, :channel
-  alias DeliveryLocationService.Location
-  alias DeliveryLocationService.LocationSupervisor
+  alias DeliveryLocationService.LocationServer
+  alias DeliveryLocationServiceWeb.Endpoint
+  require Logger
 
-  def join("driver:" <> driver_id, _params, socket) do
+  def join("driver:" <> driver_id, %{"lat" => lat, "long" => long}, socket) do
     case LocationServer.location_data_pid(driver_id) do
       pid when is_pid(pid) ->
-        send(self(), {:after_join, driver_id})
+        send(self(), {:after_join, driver_id, %{lat: lat, long: long}})
         {:ok, socket}
       nil ->
-        %Location{driver_id: driver_id, restaurant_id: nil, coordinates: %{lat: nil, long: nil}, timestamp: Time.utc_now}
-        |> LocationSupervisor.start_location
-
-        send(self(), {:after_join, driver_id})
+        LocationServer.create(driver_id)
+        send(self(), {:after_join, driver_id, %{lat: lat, long: long}})
         {:ok, socket}
-      _ ->
-        {:error, %{reason: "Something happened"}}
     end
   end
 
-  def handle_info({:after_join, driver_id}, socket) do
-    #After the join we push a message to request the client to send his coordinates, in case it didn't get sent
-    #for any reason
-    #Also some stuff with presence
-    push(socket, "request_location_update", %{msg: "Location requested by channel"})
+  def handle_info({:after_join, driver_id, coordinates}, socket) do
+    LocationServer.update_coordinates(driver_id, coordinates)
+    updated_coordinates = LocationServer.location_data_pid(driver_id) |> :sys.get_state |> Map.get(:coordinates)
+    push(socket, "logs", %{message: "Connected to Channel with reported location #{updated_coordinates.lat} #{updated_coordinates.long}"})
+    Endpoint.broadcast!("admin:locations", "logs", %{message: "Driver #{driver_id} just connected"})
 
-
-    #push(socket, "presence_state", Presence.list(socket))
-    #{:ok, _} =
-    #  Presence.track(socket, current_driver(socket).name, %{
-    #    online_at: inspect(System.system_time(:seconds)),
-    #    color: current_driver(socket).color
-    #  })
     {:noreply, socket}
   end
 
-  def handle_in("update_location", %{"coordinates" => new_coordinates}, socket) do
-    "driver:" <> driver_id = socket.topic
+  def handle_in("update_location", new_coordinates, socket) do
+    IO.puts(inspect new_coordinates)
+    %{"lat" => lat, "long" => long} = new_coordinates
+    IO.puts(inspect lat)
+    IO.puts(inspect long)
 
-    case LocationServer.location_data_pid(driver_id) do
-      pid when is_pid(pid) ->
-        LocationServer.update_coordinates(driver_id, new_coordinates)
-        #broadcast!(socket, "location_update", new_location_data)
-        {:noreply, socket}
-      nil ->
-        {:reply, {:error, %{reason: "Driver's data does not exist"}}, socket}
+    "driver:" <> driver_id = socket.topic
+    LocationServer.update_coordinates(driver_id, %{lat: lat, long: long})
+
+    current_state =
+      LocationServer.location_data_pid(driver_id)
+      |> :sys.get_state()
+
+    current_restaurant_id =
+      current_state
+      |> Map.get(:restaurant_id)
+
+    if current_restaurant_id != nil do
+      Logger.info("Will send to restaurant #{current_restaurant_id}")
+      Endpoint.broadcast!("restaurant:#{current_restaurant_id}", "driver_update", Map.from_struct(current_state))
+    end
+    push_data_to_admins(driver_id)
+
+    {:noreply, socket}
+  end
+
+  def handle_in("accepted_order", %{"restaurant_id" => restaurant_id}, socket) do
+    "driver:" <> driver_id = socket.topic
+    LocationServer.update_restaurant(driver_id, restaurant_id)
+    Endpoint.broadcast!("restaurant:#{restaurant_id}", "driver_delivering", %{driver_id: driver_id})
+    push_data_to_admins(driver_id)
+
+    {:noreply, socket}
+  end
+
+  def handle_in("finished_order", %{"restaurant_id" => restaurant_id_client}, socket) do
+    "driver:" <> driver_id = socket.topic
+    LocationServer.update_restaurant(driver_id, nil)
+    restaurant_id_server = LocationServer.view(driver_id).restaurant_id
+    if restaurant_id_client == restaurant_id_server do
+      Endpoint.broadcast!("restaurant:#{restaurant_id_server}", "finished_delivering", %{driver_id: driver_id})
+    end
+    push_data_to_admins(driver_id)
+
+    {:noreply, socket}
+
+  end
+
+  def handle_in("subscription_request", %{"restaurant_id" => restaurant_id}, socket) do
+    "driver:" <> driver_id = socket.topic
+    registered_restaurant_id =
+      LocationServer.location_data_pid(driver_id)
+      |> :sys.get_state()
+      |> Map.get(:restaurant_id)
+    if registered_restaurant_id == restaurant_id do
+      Endpoint.broadcast!("restaurant:#{restaurant_id}", "driver_delivering", %{driver_id: driver_id})
     end
   end
 
+  def handle_in( "ping", _params, socket ) do
+    push(socket, "pong", %{msg: "pong!"})
+    {:reply, :ok, socket}
+  end
+
+  defp push_data_to_admins(driver_id) do
+    data =
+      LocationServer.location_data_pid(driver_id)
+      |> :sys.get_state()
+      |> Map.from_struct
+    IO.puts(inspect data)
+
+    Endpoint.broadcast!("admin:locations", "driver_update", data)
+  end
 
   #Only for reference
   #If we wanted to extract data from the socket
