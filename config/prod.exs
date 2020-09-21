@@ -10,10 +10,12 @@ use Mix.Config
 # which you should run after static files are built and
 # before starting your production server.
 config :delivery_location_service, DeliveryLocationServiceWeb.Endpoint,
-  http: [port: {:system, "PORT"}],
+  load_from_system_env: true,
+  http: [port: {:system, "PORT"}],  
   url: [scheme: "https", host: "vast-reaches-60349.herokuapp.com", port: 443],
   force_ssl: [rewrite_on: [:x_forwarded_proto]],
-  cache_static_manifest: ""
+  cache_static_manifest: "",
+  secret_key_base: Map.fetch!(System.get_env(), "SECRET_KEY_BASE")
 
 # Do not print debug messages in production
 config :logger, level: :info
