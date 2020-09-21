@@ -11,16 +11,16 @@ defmodule DeliveryLocationServiceWeb.Endpoint do
   ]
 
   socket "/socket/driver", DeliveryLocationServiceWeb.DriverSocket,
-    websocket: true,
+    websocket: [timeout: 45_000],
     longpoll: false
 
 
   socket "/socket/restaurant", DeliveryLocationServiceWeb.RestaurantSocket,
-    websocket: true,
+    websocket: [timeout: 45_000],
     longpoll: false
 
   socket "/socket/admin", DeliveryLocationServiceWeb.AdminSocket,
-    websocket: true,
+    websocket: [timeout: 45_000],
     longpoll: false
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
