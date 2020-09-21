@@ -16,8 +16,7 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
     "restaurant" <> restaurant_id = socket.topic
     LocationsHelper.get_orders_for(restaurant_id)
     |> Enum.map(fn driver_data -> driver_data.driver_id end)
-    #TODO check credo's warning regarding unused values
-    |> Enum.map(fn driver_id ->
+    |> Enum.each(fn driver_id ->
       Endpoint.broadcast!("driver:#{driver_id}", "subscription_request", %{restaurant_id: restaurant_id})
     end)
     {:noreply, socket}

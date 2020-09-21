@@ -3,6 +3,7 @@ defmodule DeliveryLocationService.LocationsHelper do
   Provides a set of helper functions to work with the Location GenServer's state.
   """
   alias DeliveryLocationService.Location
+  alias DeliveryLocationService.LocationServer
   alias DeliveryLocationService.LocationSupervisor
 
   def get_orders_for_all do
@@ -23,6 +24,11 @@ defmodule DeliveryLocationService.LocationsHelper do
     |> Enum.filter(fn location_data ->
       Location.is_owned_by_restaurant?(location_data, restaurant_id) == true
     end)
+  end
+
+  def is_delivering?(driver_id) do
+    LocationServer.view(driver_id)
+    |> Map.get(:restaurant_id) != nil
   end
 
   def reset_restaurant(driver_id) do

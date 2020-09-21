@@ -18,7 +18,6 @@ defmodule DeliveryLocationServiceWeb.DriverSocket do
   @impl true
   def connect(%{"driver_id" => driver_id, "vsn" => _}, socket) do
     #TODO send the token to the Java backend to validate
-    #TODO save the validated tokens in a ets table so I don't need to check each time
     #This will be obtained from the Java backend after sending the token
     socket = assign(socket, :driver_id, driver_id)
     {:ok, socket}

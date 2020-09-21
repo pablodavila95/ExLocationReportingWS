@@ -2,7 +2,7 @@ defmodule DeliveryLocationServiceWeb.AdminSocket do
   use Phoenix.Socket
 
   ## Channels
-  channel "admin:locations", DeliveryLocationServiceWeb.AdminChannel
+  channel "admins", DeliveryLocationServiceWeb.AdminChannel
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
