@@ -5,7 +5,9 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   """
   use DeliveryLocationServiceWeb, :channel
   alias DeliveryLocationService.LocationServer
+  alias DeliveryLocationService.LocationsHelper
   alias DeliveryLocationServiceWeb.Endpoint
+  alias DeliveryLocationServiceWeb.Presence
   require Logger
 
   def join("driver:" <> driver_id, %{"lat" => lat, "long" => long}, socket) do
@@ -24,8 +26,17 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     LocationServer.update_coordinates(driver_id, coordinates)
     updated_coordinates = LocationServer.location_data_pid(driver_id) |> :sys.get_state |> Map.get(:coordinates)
     push(socket, "logs", %{message: "Connected to Channel with reported location #{updated_coordinates.lat} #{updated_coordinates.long}"})
-    Endpoint.broadcast!("admin:locations", "logs", %{message: "Driver #{driver_id} just connected"})
+    Endpoint.broadcast!("admins", "logs", %{message: "Driver #{driver_id} just connected"})
+    {:ok, _} = Presence.track(socket, "driver:#{driver_id}", %{
+      online_at: inspect(Time.utc_now()),
+      is_delivering: inspect(LocationsHelper.is_delivering?(driver_id))
+    })
+    Endpoint.broadcast!("admins", "presence_state", Presence.list(socket))
+    {:noreply, socket}
+  end
 
+  def handle_in("presence_diff", diff, socket) do
+    Endpoint.broadcast!("admins", "presence_diff", diff)
     {:noreply, socket}
   end
 
@@ -100,7 +111,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
       |> Map.from_struct
     IO.puts(inspect data)
 
-    Endpoint.broadcast!("admin:locations", "driver_update", data)
+    Endpoint.broadcast!("admins", "driver_update", data)
   end
 
   #Only for reference

@@ -2,9 +2,6 @@ defmodule DeliveryLocationService.Location do
   @moduledoc """
   Defines the Location struct and its methods to update it. It's being used by the LocationServer.
   """
-  #TODO add a new key for the current state of the driver
-  #TODO give the coordinates its own struct
-  #TODO add validations
   defstruct driver_id: nil, restaurant_id: nil, coordinates: %{}, timestamp: nil
   alias DeliveryLocationService.Location
 
