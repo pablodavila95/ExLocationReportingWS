@@ -10,6 +10,7 @@ use Mix.Config
 # which you should run after static files are built and
 # before starting your production server.
 config :delivery_location_service, DeliveryLocationServiceWeb.Endpoint,
+  check_origin: [..., //localhost:*, //localhost*, //localhost]
   load_from_system_env: true,
   http: [port: {:system, "PORT"}],  
   url: [scheme: "https", host: "vast-reaches-60349.herokuapp.com", port: 443],
