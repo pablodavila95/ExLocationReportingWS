@@ -4,8 +4,8 @@ defmodule DeliveryLocationService.LocationSupervisor do
   """
   use DynamicSupervisor
 
-  alias DeliveryLocationService.LocationServer
   alias DeliveryLocationService.Location
+  alias DeliveryLocationService.LocationServer
 
   def start_link(_arg) do
     DynamicSupervisor.start_link(__MODULE__, :ok, name: __MODULE__)

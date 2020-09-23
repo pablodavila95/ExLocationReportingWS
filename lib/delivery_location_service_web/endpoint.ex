@@ -14,7 +14,6 @@ defmodule DeliveryLocationServiceWeb.Endpoint do
     websocket: [timeout: 45_000],
     longpoll: false
 
-
   socket "/socket/restaurant", DeliveryLocationServiceWeb.RestaurantSocket,
     websocket: [timeout: 45_000],
     longpoll: false

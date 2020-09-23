@@ -3,9 +3,9 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   This module provides the channel for a restaurant that will monitor orders assigned to it.
   """
   use DeliveryLocationServiceWeb, :channel
-  alias DeliveryLocationServiceWeb.Endpoint
-  alias DeliveryLocationService.LocationsHelper
   alias DeliveryLocationService.Location
+  alias DeliveryLocationService.LocationsHelper
+  alias DeliveryLocationServiceWeb.Endpoint
 
   def join("restaurant" <> restaurant_id, _params, socket) do
     send(self(), {:after_join})
@@ -14,11 +14,15 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
 
   def handle_info({:after_join}, socket) do
     "restaurant" <> restaurant_id = socket.topic
+
     LocationsHelper.get_orders_for(restaurant_id)
     |> Enum.map(fn driver_data -> driver_data.driver_id end)
     |> Enum.each(fn driver_id ->
-      Endpoint.broadcast!("driver:#{driver_id}", "subscription_request", %{restaurant_id: restaurant_id})
+      Endpoint.broadcast!("driver:#{driver_id}", "subscription_request", %{
+        restaurant_id: restaurant_id
+      })
     end)
+
     {:noreply, socket}
   end
 
@@ -27,7 +31,6 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   end
 
   def handle_in("driver_update", %Location{} = location_data, socket) do
-
     push(socket, "driver_update", Map.from_struct(location_data))
     {:noreply, socket}
   end
@@ -40,6 +43,7 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   defp put_new_driver(socket, driver) do
     Enum.reduce(driver, socket, fn driver, acc ->
       drivers = acc.assigns.drivers
+
       if driver in drivers do
         acc
       else

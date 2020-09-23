@@ -5,20 +5,26 @@ defmodule DeliveryLocationService.LocationServer do
   It also makes use of :ets in case the process crashes it can be called back from the in-memory db.
   Since the state is ephemeral, :ets is not really needed and can be removed if needed to scale but it was a nice addition.
   """
-  #TODO add the corresponding hours to set UTC to mx's timezone
-  #TODO update :ets table whenever something updates
+
+  # TODO add the corresponding hours to set UTC to mx's timezone
+  # TODO update :ets table whenever something updates
 
   use GenServer
   alias DeliveryLocationService.Location
   require Logger
 
-  #@timeout :timer.minutes(15)
-
+  # @timeout :timer.minutes(15)
 
   def create(driver_id) do
     case location_data_pid(driver_id) do
       nil ->
-        DeliveryLocationService.LocationSupervisor.start_location(%Location{driver_id: driver_id, restaurant_id: nil, coordinates: %{lat: nil, long: nil}, timestamp: Time.utc_now})
+        DeliveryLocationService.LocationSupervisor.start_location(%Location{
+          driver_id: driver_id,
+          restaurant_id: nil,
+          coordinates: %{lat: nil, long: nil},
+          timestamp: Time.utc_now()
+        })
+
       _driver_location ->
         {:error, :user_already_registered}
     end
@@ -26,7 +32,12 @@ defmodule DeliveryLocationService.LocationServer do
 
   @spec start_link(DeliveryLocationService.Location.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(%Location{} = location_data) do
-    GenServer.start_link(__MODULE__, {location_data.driver_id, location_data.restaurant_id, location_data.coordinates, location_data.timestamp}, name: via_tuple(location_data.driver_id))
+    GenServer.start_link(
+      __MODULE__,
+      {location_data.driver_id, location_data.restaurant_id, location_data.coordinates,
+       location_data.timestamp},
+      name: via_tuple(location_data.driver_id)
+    )
   end
 
   def view(driver_id) do
@@ -63,26 +74,29 @@ defmodule DeliveryLocationService.LocationServer do
         [{^driver_id, location_data}] ->
           location_data
       end
+
     Logger.info("Spawned a location_data for a driver with id '#{driver_id}'.")
     {:ok, location_data}
-    #{:ok, location_data, @timeout}
+    # {:ok, location_data, @timeout}
   end
 
   def handle_call(:view, _from, location_data) do
     {:reply, view_data(location_data), location_data}
-    #{:reply, view_data(location_data), location_data, @timeout}
+    # {:reply, view_data(location_data), location_data, @timeout}
   end
 
   def handle_cast({:update_coordinates, %{} = new_coordinates}, location_data) do
-    new_location_data = Location.update_coordinates(location_data, new_coordinates, Time.utc_now)
+    new_location_data =
+      Location.update_coordinates(location_data, new_coordinates, Time.utc_now())
+
     {:noreply, new_location_data}
-    #{:noreply, new_location_data, @timeout}
+    # {:noreply, new_location_data, @timeout}
   end
 
   def handle_cast({:update_restaurant, new_restaurant}, location_data) do
-    new_location_data = Location.update_restaurant(location_data, new_restaurant, Time.utc_now)
+    new_location_data = Location.update_restaurant(location_data, new_restaurant, Time.utc_now())
     {:noreply, new_location_data}
-    #{:noreply, new_location_data, @timeout}
+    # {:noreply, new_location_data, @timeout}
   end
 
   def handle_info(:timeout, location_data) do
@@ -99,7 +113,7 @@ defmodule DeliveryLocationService.LocationServer do
   end
 
   defp location_data_driver_id do
-    Registry.keys(DeliveryLocationService.LocationRegistry, self()) |> List.first
+    Registry.keys(DeliveryLocationService.LocationRegistry, self()) |> List.first()
   end
 
   defp view_data(%Location{} = location_data) do
