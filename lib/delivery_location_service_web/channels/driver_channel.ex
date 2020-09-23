@@ -23,10 +23,17 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   end
 
   def handle_info({:after_join, driver_id, coordinates}, socket) do
+    #Update coordinates after join. Assign to a value.
     LocationServer.update_coordinates(driver_id, coordinates)
     updated_coordinates = LocationServer.location_data_pid(driver_id) |> :sys.get_state |> Map.get(:coordinates)
+
+    #Push logs to admins and current client
     push(socket, "logs", %{message: "Connected to Channel with reported location #{updated_coordinates.lat} #{updated_coordinates.long}"})
     Endpoint.broadcast!("admins", "logs", %{message: "Driver #{driver_id} just connected"})
+
+    push_data_to_admins(driver_id)
+
+    #Presence stuff
     {:ok, _} = Presence.track(socket, "driver:#{driver_id}", %{
       online_at: inspect(Time.utc_now()),
       is_delivering: inspect(LocationsHelper.is_delivering?(driver_id))

@@ -6,6 +6,7 @@ defmodule DeliveryLocationService.LocationServer do
   Since the state is ephemeral, :ets is not really needed and can be removed if needed to scale but it was a nice addition.
   """
   #TODO add the corresponding hours to set UTC to mx's timezone
+  #TODO update :ets table whenever something updates
 
   use GenServer
   alias DeliveryLocationService.Location
@@ -50,6 +51,7 @@ defmodule DeliveryLocationService.LocationServer do
     |> GenServer.whereis()
   end
 
+  ################################################################################
   def init({driver_id, restaurant_id, coordinates, timestamp}) do
     location_data =
       case :ets.lookup(:locations_table, driver_id) do
