@@ -88,6 +88,7 @@ defmodule DeliveryLocationService.LocationServer do
   def handle_cast({:update_coordinates, %{} = new_coordinates}, location_data) do
     new_location_data =
       Location.update_coordinates(location_data, new_coordinates, Time.utc_now())
+    :ets.insert(:locations_table, {location_data_driver_id(), new_location_data})
 
     {:noreply, new_location_data}
     # {:noreply, new_location_data, @timeout}
