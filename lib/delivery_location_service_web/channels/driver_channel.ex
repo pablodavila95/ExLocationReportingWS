@@ -9,6 +9,9 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   alias DeliveryLocationServiceWeb.Endpoint
   alias DeliveryLocationServiceWeb.Presence
   require Logger
+  
+  #TODO don't allow input of empty locations
+  #TODO warn admins of large variations between locations
 
   def join("driver:" <> driver_id, %{"lat" => lat, "long" => long}, socket) do
     case LocationServer.location_data_pid(driver_id) do
