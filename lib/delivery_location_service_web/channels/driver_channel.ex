@@ -9,7 +9,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   alias DeliveryLocationServiceWeb.Endpoint
   alias DeliveryLocationServiceWeb.Presence
   require Logger
-  
+
   #TODO don't allow input of empty locations
   #TODO warn admins of large variations between locations
 
@@ -76,21 +76,26 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     {:noreply, socket}
   end
 
-  def handle_in("accepted_order", %{"restaurant_id" => restaurant_id}, socket) do
+  def handle_in("accepted_order", %{"restaurant_id" => restaurant_id, "order_id" => order_id}, socket) do
     "driver:" <> driver_id = socket.topic
     LocationServer.update_restaurant(driver_id, restaurant_id)
+    LocationServer.update_order(driver_id, order_id)
     Endpoint.broadcast!("restaurant:#{restaurant_id}", "driver_delivering", %{driver_id: driver_id})
     push_data_to_admins(driver_id)
 
     {:noreply, socket}
   end
 
-  def handle_in("finished_order", %{"restaurant_id" => restaurant_id_client}, socket) do
+  def handle_in("finished_order", %{"restaurant_id" => restaurant_id_client, "order_id" => order_id_client}, socket) do
     "driver:" <> driver_id = socket.topic
     LocationServer.update_restaurant(driver_id, nil)
+    LocationServer.update_order(driver_id, nil)
+
     restaurant_id_server = LocationServer.view(driver_id).restaurant_id
-    if restaurant_id_client == restaurant_id_server do
-      Endpoint.broadcast!("restaurant:#{restaurant_id_server}", "finished_delivering", %{driver_id: driver_id})
+    order_id_server = LocationServer.view(driver_id).order_id
+
+    if restaurant_id_client == restaurant_id_server and order_id_client == order_id_server do
+      Endpoint.broadcast!("restaurant:#{restaurant_id_server}", "finished_delivering", %{driver_id: driver_id, order_id: order_id_server})
     end
     push_data_to_admins(driver_id)
 

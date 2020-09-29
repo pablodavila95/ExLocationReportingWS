@@ -40,4 +40,11 @@ defmodule DeliveryLocationService.LocationsHelper do
     DeliveryLocationService.LocationServer.update_restaurant(driver_id, restaurant_id)
   end
 
+  def reset_order(driver_id) do
+    DeliveryLocationService.LocationServer.update_order(driver_id, nil)
+  end
+
+  def set_order(driver_id, order_id) do
+    DeliveryLocationService.LocationServer.update_order(driver_id, order_id)
+  end
 end
