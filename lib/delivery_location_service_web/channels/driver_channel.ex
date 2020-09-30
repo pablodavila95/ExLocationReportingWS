@@ -92,7 +92,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     LocationServer.update_order(driver_id, nil)
 
     restaurant_id_server = LocationServer.view(driver_id).restaurant_id
-    order_id_server = LocationServer.view(driver_id).order_id
+    order_id_server = LocationServer.view(driver_id).current_order
 
     if restaurant_id_client == restaurant_id_server and order_id_client == order_id_server do
       Endpoint.broadcast!("restaurant:#{restaurant_id_server}", "finished_delivering", %{driver_id: driver_id, order_id: order_id_server})
