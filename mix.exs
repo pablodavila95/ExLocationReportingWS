@@ -40,9 +40,11 @@ defmodule DeliveryLocationService.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
+      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:peppermint, "~> 0.3.1 "},
       {:castore, "~> 0.1.0"},
-      {:mint, "~> 1.0"},
-      {:credo, "~> 1.4", only: [:dev, :test], runtime: false}
+      {:json_web_token, "~> 0.2"},
+      {:jwt_claims, "~> 0.0"}
     ]
   end
 

@@ -15,7 +15,7 @@ defmodule DeliveryLocationService.Application do
       {Phoenix.PubSub, name: DeliveryLocationService.PubSub},
       # Start the Endpoint (http/https)
       DeliveryLocationServiceWeb.Endpoint,
-      DeliveryLocationServiceWeb.Presence
+      DeliveryLocationServiceWeb.Presence,
       # Start a worker by calling: DeliveryLocationService.Worker.start_link(arg)
       # {DeliveryLocationService.Worker, arg}
     ]

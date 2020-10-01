@@ -72,7 +72,9 @@ defmodule DeliveryLocationService.LocationServer do
     location_data =
       case :ets.lookup(:locations_table, driver_id) do
         [] ->
-          location_data = Location.new(driver_id, restaurant_id, coordinates, timestamp, current_order)
+          location_data =
+            Location.new(driver_id, restaurant_id, coordinates, timestamp, current_order)
+
           :ets.insert(:locations_table, {driver_id, location_data})
           location_data
 
@@ -93,6 +95,7 @@ defmodule DeliveryLocationService.LocationServer do
   def handle_cast({:update_coordinates, %{} = new_coordinates}, location_data) do
     new_location_data =
       Location.update_coordinates(location_data, new_coordinates, Time.utc_now())
+
     :ets.insert(:locations_table, {location_data_driver_id(), new_location_data})
 
     {:noreply, new_location_data}

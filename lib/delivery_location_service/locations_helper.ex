@@ -31,6 +31,8 @@ defmodule DeliveryLocationService.LocationsHelper do
     |> Map.get(:restaurant_id) != nil
   end
 
+  #TODO use the following functions in the DriverChannel
+
   def reset_restaurant(driver_id) do
     DeliveryLocationService.LocationServer.update_restaurant(driver_id, nil)
     :ok
