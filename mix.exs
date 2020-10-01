@@ -43,8 +43,8 @@ defmodule DeliveryLocationService.MixProject do
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:peppermint, "~> 0.3.1 "},
       {:castore, "~> 0.1.0"},
-      {:json_web_token, "~> 0.2"},
-      {:jwt_claims, "~> 0.0"}
+      # {:json_web_token, "~> 0.2"},
+      # {:jwt_claims, "~> 0.0"}
     ]
   end
 
