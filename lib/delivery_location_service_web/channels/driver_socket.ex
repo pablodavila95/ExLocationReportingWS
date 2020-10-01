@@ -21,7 +21,7 @@ defmodule DeliveryLocationServiceWeb.DriverSocket do
     %{"user_id" => user_id, "role_access" => role_access} = UserValidation.user_json(token)
 
     if role_access == "DRIVER" do
-      {:ok, assign(socket, :admin_id, user_id)}
+      {:ok, assign(socket, :driver_id, user_id)}
     else
       :error
     end

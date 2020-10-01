@@ -21,7 +21,7 @@ defmodule DeliveryLocationServiceWeb.RestaurantSocket do
     %{"user_id" => user_id, "role_access" => role_access} = UserValidation.user_json(token)
 
     if role_access == "RESTAURANT" do
-      {:ok, assign(socket, :admin_id, user_id)}
+      {:ok, assign(socket, :restaurant_id, user_id)}
     else
       :error
     end

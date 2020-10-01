@@ -14,23 +14,25 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   # TODO warn admins of large variations between locations
 
   def join("driver:" <> driver_id, %{"lat" => lat, "long" => long}, socket) do
-    case LocationServer.location_data_pid(driver_id) do
-      pid when is_pid(pid) ->
-        Logger.info("GS already existed for driver #{driver_id}")
+    if socket.assigns.driver_id == driver_id do
+      case LocationServer.location_data_pid(driver_id) do
+        pid when is_pid(pid) ->
+          Logger.info("GS already existed for driver #{driver_id}")
 
-        %{coordinates: %{lat: existing_lat, long: existing_long} = _existing_coordinates} =
-          get_state(driver_id)
+          %{coordinates: %{lat: existing_lat, long: existing_long} = _existing_coordinates} =
+            get_state(driver_id)
 
-        Logger.info("Reusing existing coordinates.")
-        send(self(), {:after_join, driver_id, %{lat: existing_lat, long: existing_long}})
-        {:ok, socket}
+          Logger.info("Reusing existing coordinates.")
+          send(self(), {:after_join, driver_id, %{lat: existing_lat, long: existing_long}})
+          {:ok, socket}
 
-      nil ->
-        Logger.info("Created a new GS for #{driver_id}")
-        LocationServer.create(driver_id)
-        Logger.info("Using default coordinates from frontend: {lat: #{lat}, long: #{long}")
-        send(self(), {:after_join, driver_id, %{lat: lat, long: long}})
-        {:ok, socket}
+        nil ->
+          Logger.info("Created a new GS for #{driver_id}")
+          LocationServer.create(driver_id)
+          Logger.info("Using default coordinates from frontend: {lat: #{lat}, long: #{long}")
+          send(self(), {:after_join, driver_id, %{lat: lat, long: long}})
+          {:ok, socket}
+      end
     end
   end
 

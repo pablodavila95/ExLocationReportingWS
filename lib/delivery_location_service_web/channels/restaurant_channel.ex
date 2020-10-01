@@ -8,8 +8,10 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   alias DeliveryLocationServiceWeb.Endpoint
 
   def join("restaurant" <> restaurant_id, _params, socket) do
-    send(self(), {:after_join})
-    {:ok, socket |> assign(:drivers, []) |> assign(:restaurant_id, restaurant_id)}
+    if socket.assigns.restaurant_id == restaurant_id do
+      send(self(), {:after_join})
+      {:ok, socket |> assign(:drivers, []) |> assign(:restaurant_id, restaurant_id)}
+    end
   end
 
   def handle_info({:after_join}, socket) do
