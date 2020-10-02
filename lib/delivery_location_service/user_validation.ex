@@ -34,7 +34,7 @@ defmodule DeliveryLocationService.UserValidation do
     end
   end
 
-  defp user_json(token) do
+  def user_json(token) do
     # TODO fix validation. A reply might be :ok but not have the stuff I need
     {:ok, %{status: 200, headers: _headers, body: body}} =
       Peppermint.get(backend_verify(), params: %{cookie2: token})
@@ -46,22 +46,22 @@ defmodule DeliveryLocationService.UserValidation do
   defp extract(data) do
     # Roles: SUPER_ADMIN | ADMIN_COMPANY | RESTAURANT | DRIVER
 
-    # case Map.get(data, "customerCompany") do
-    #   nil ->
-    #     %{"roleAccess" => role_access, "customerCompany" => %{"id" => user_id}} = data
-    #     %{"user_id" => user_id, "role_access" => role_access}
+    case Map.get(data, "customerCompany") do
+      nil ->
+        %{"id" => user_id, "roleAccess" => role_access} = data
+        %{"user_id" => user_id, "role_access" => role_access}
 
-    #   _ ->
-    #     %{"id" => user_id, "roleAccess" => role_access} = data
-    #     %{"user_id" => user_id, "role_access" => role_access}
-    # end
-
-    if Map.get(data, "customerCompany") != nil do
-      %{"roleAccess" => role_access, "customerCompany" => %{"id" => user_id}} = data
-      %{"user_id" => user_id, "role_access" => role_access}
-    else
-      %{"id" => user_id, "roleAccess" => role_access} = data
-      %{"user_id" => user_id, "role_access" => role_access}
+      _ ->
+        %{"roleAccess" => role_access, "customerCompany" => %{"id" => user_id}} = data
+        %{"user_id" => user_id, "role_access" => role_access}
     end
+
+    # if Map.get(data, "customerCompany") != nil do
+    #   %{"roleAccess" => role_access, "customerCompany" => %{"id" => user_id}} = data
+    #   %{"user_id" => user_id, "role_access" => role_access}
+    # else
+    #   %{"id" => user_id, "roleAccess" => role_access} = data
+    #   %{"user_id" => user_id, "role_access" => role_access}
+    # end
   end
 end
