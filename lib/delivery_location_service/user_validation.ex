@@ -45,22 +45,23 @@ defmodule DeliveryLocationService.UserValidation do
 
   defp extract(data) do
     # Roles: SUPER_ADMIN | ADMIN_COMPANY | RESTAURANT | DRIVER
-    case Map.get(data, "customerCompany") do
-      nil ->
-        %{"roleAccess" => role_access, "customerCompany" => %{"id" => user_id}} = data
-        %{"user_id" => user_id, "role_access" => role_access}
 
-      _ ->
-        %{"id" => user_id, "roleAccess" => role_access} = data
-        %{"user_id" => user_id, "role_access" => role_access}
-    end
+    # case Map.get(data, "customerCompany") do
+    #   nil ->
+    #     %{"roleAccess" => role_access, "customerCompany" => %{"id" => user_id}} = data
+    #     %{"user_id" => user_id, "role_access" => role_access}
 
-    # if Map.get(data, "customerCompany") != nil do
-    #   %{"roleAccess" => role_access, "customerCompany" => %{"id" => user_id}} = data
-    #   %{"user_id" => user_id, "role_access" => role_access}
-    # else
-    #   %{"id" => user_id, "roleAccess" => role_access} = data
-    #   %{"user_id" => user_id, "role_access" => role_access}
+    #   _ ->
+    #     %{"id" => user_id, "roleAccess" => role_access} = data
+    #     %{"user_id" => user_id, "role_access" => role_access}
     # end
+
+    if Map.get(data, "customerCompany") != nil do
+      %{"roleAccess" => role_access, "customerCompany" => %{"id" => user_id}} = data
+      %{"user_id" => user_id, "role_access" => role_access}
+    else
+      %{"id" => user_id, "roleAccess" => role_access} = data
+      %{"user_id" => user_id, "role_access" => role_access}
+    end
   end
 end
