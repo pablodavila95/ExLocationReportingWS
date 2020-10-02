@@ -14,7 +14,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   # TODO warn admins of large variations between locations
 
   def join("driver:" <> driver_id, %{"lat" => lat, "long" => long}, socket) do
-    if socket.assigns.driver_id == driver_id do
+    # if socket.assigns.driver_id == driver_id do
       case LocationServer.location_data_pid(driver_id) do
         pid when is_pid(pid) ->
           Logger.info("GS already existed for driver #{driver_id}")
@@ -33,7 +33,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
           send(self(), {:after_join, driver_id, %{lat: lat, long: long}})
           {:ok, socket}
       end
-    end
+    # end
   end
 
   def handle_info({:after_join, driver_id, coordinates}, socket) do
