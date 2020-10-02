@@ -1,6 +1,7 @@
 defmodule DeliveryLocationServiceWeb.DriverSocket do
   use Phoenix.Socket
   alias DeliveryLocationService.UserValidation
+  require Logger
 
   ## Channels
   channel "driver:*", DeliveryLocationServiceWeb.DriverChannel
@@ -18,12 +19,20 @@ defmodule DeliveryLocationServiceWeb.DriverSocket do
   # performing token verification on connect.
   @impl true
   def connect(%{"token" => token, "vsn" => _}, socket) do
-    %{"user_id" => user_id, "role_access" => role_access} = UserValidation.user_json(token)
+    # %{"user_id" => user_id, "role_access" => role_access} = UserValidation.user_json(token)
 
-    if role_access == "DRIVER" do
-      {:ok, assign(socket, :driver_id, user_id)}
-    else
-      :error
+    # if role_access == "DRIVER" do
+    #   {:ok, assign(socket, :driver_id, user_id)}
+    # else
+    #   :error
+    # end
+
+    case UserValidation.validate(:driver, token) do
+      {:ok, user_id} ->
+        {:ok, assign(socket, :driver_id, user_id)}
+      {:error, reason} ->
+        Logger.info("Couldn't connect to socket. Reason: #{reason}")
+        :error
     end
 
     # Refactor so it looks like traditional Phoenix auth validation

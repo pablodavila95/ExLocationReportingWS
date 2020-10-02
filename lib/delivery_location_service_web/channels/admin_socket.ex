@@ -1,5 +1,6 @@
 defmodule DeliveryLocationServiceWeb.AdminSocket do
   use Phoenix.Socket
+  require Logger
   alias DeliveryLocationService.UserValidation
 
   ## Channels
@@ -18,12 +19,20 @@ defmodule DeliveryLocationServiceWeb.AdminSocket do
   # performing token verification on connect.
   @impl true
   def connect(%{"token" => token, "vsn" => _}, socket) do
-    %{"user_id" => user_id, "role_access" => role_access} = UserValidation.user_json(token)
+    # %{"user_id" => user_id, "role_access" => role_access} = UserValidation.user_json(token)
 
-    if role_access == "SUPER_ADMIN" or role_access == "ADMIN_COMPANY" do
-      {:ok, assign(socket, :admin_id, user_id)}
-    else
-      :error
+    # if role_access == "SUPER_ADMIN" or role_access == "ADMIN_COMPANY" do
+    #   {:ok, assign(socket, :admin_id, user_id)}
+    # else
+    #   :error
+    # end
+
+    case UserValidation.validate(:admin, token) do
+      {:ok, user_id} ->
+        {:ok, assign(socket, :admin_id, user_id)}
+      {:error, reason} ->
+        Logger.info("Couldn't connect to socket. Reason: #{reason}")
+        :error
     end
 
     # Refactor so it looks like traditional Phoenix auth validation
