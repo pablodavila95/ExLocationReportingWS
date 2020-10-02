@@ -14,13 +14,14 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   # TODO warn admins of large variations between locations
 
   def join("driver:" <> driver_id, %{"lat" => lat, "long" => long}, socket) do
-    # if socket.assigns.driver_id == driver_id do
+    if socket.assigns.driver_id == driver_id do
       case LocationServer.location_data_pid(driver_id) do
         pid when is_pid(pid) ->
           Logger.info("GS already existed for driver #{driver_id}")
 
-          %{coordinates: %{"lat" => existing_lat, "long" => existing_long} = _existing_coordinates} =
-            get_state(driver_id)
+          # %{coordinates: %{"lat" => existing_lat, "long" => existing_long}} = get_state(driver_id)
+          existing_lat = Map.get(Map.get(get_state(driver_id), :coordinates), :lat)
+          existing_long = Map.get(Map.get(get_state(driver_id), :coordinates), :long)
 
           Logger.info("Reusing existing coordinates.")
           send(self(), {:after_join, driver_id, %{lat: existing_lat, long: existing_long}})
@@ -33,19 +34,20 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
           send(self(), {:after_join, driver_id, %{"lat" => lat, "long" => long}})
           {:ok, socket}
       end
-    # end
+    end
+    {:error, %{reason: "error while authenticating. ID doesn't match with server reply"}}
   end
 
   def handle_info({:after_join, driver_id, coordinates}, socket) do
     # Update coordinates after join. Assign to a value.
     LocationServer.update_coordinates(driver_id, coordinates)
 
-    updated_coordinates =
-      LocationServer.location_data_pid(driver_id) |> :sys.get_state() |> Map.get(:coordinates)
+    # updated_coordinates =
+    #   LocationServer.location_data_pid(driver_id) |> :sys.get_state() |> Map.get(:coordinates)
 
     # Push logs to admins and current client
     push(socket, "logs", %{
-      message: "Connected to Channel successfully with coordinates #{updated_coordinates}"
+      message: "Connected to Channel successfully"
     })
 
     Endpoint.broadcast!("admins", "logs", %{message: "Driver #{driver_id} just connected"})
@@ -72,7 +74,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
 
   def handle_in("update_location", new_coordinates, socket) do
     %{"lat" => lat, "long" => long} = new_coordinates
-    Logger.info("Updating location with lat #{lat} and long #{long}")
+    Logger.info("Updating location")
 
     "driver:" <> driver_id = socket.topic
     LocationServer.update_coordinates(driver_id, %{lat: lat, long: long})
@@ -81,7 +83,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
       LocationServer.location_data_pid(driver_id)
       |> :sys.get_state()
 
-    Logger.info("New state of driver #{driver_id} is #{current_state}")
+    Logger.info("Driver state updated")
 
     current_restaurant_id =
       current_state
@@ -172,7 +174,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
 
   defp push_data_to_admins(driver_id) do
     data = get_state(driver_id)
-    Logger.info("Sending data to admins. #{data}")
+    Logger.info("Sending data to admins.")
 
     Endpoint.broadcast!("admins", "driver_update", data)
   end

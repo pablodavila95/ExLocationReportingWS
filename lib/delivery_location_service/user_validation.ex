@@ -1,46 +1,61 @@
 defmodule DeliveryLocationService.UserValidation do
   defp backend_verify() do
-    api_url = System.get_env("API_URL") || "https://localhost:9000"
+    api_url = System.get_env("API_URL") || "https://79668a708ae1.ngrok.io"
     api_url <> "/verify/token"
   end
 
-  def validate(:admin, token) do
-    roles = ["SUPER_ADMIN", "ADMIN_COMPANY"]
-    %{"user_id" => user_id, "role_access" => role_access} = user_json(token)
+  def validate(user_role, token) do
+    available_roles = %{
+      admin: ["SUPER_ADMIN", "ADMIN_COMPANY"],
+      driver: ["DRIVER"],
+      restaurant: ["RESTAURANT"],
+      test: [nil]
+    }
 
-    case Enum.member?(roles, role_access) do
-      true -> {:ok, user_id}
-      false -> {:error, "Role is not valid."}
+    roles = Map.get(available_roles, user_role)
+
+    case user_json(token) do
+      %{"user_id" => user_id, "role_access" => role_access} ->
+        case Enum.member?(roles, role_access) do
+          true -> {:ok, user_id}
+          false -> {:error, "Role is not valid."}
+        end
+
+      error ->
+        error
     end
   end
 
-  def validate(:driver, token) do
-    roles = ["DRIVER"]
-    %{"user_id" => user_id, "role_access" => role_access} = user_json(token)
+  # def validate(:admin, token) do
+  #   roles = ["SUPER_ADMIN", "ADMIN_COMPANY"]
+  #   %{"user_id" => user_id, "role_access" => role_access} = user_json(token)
 
-    case Enum.member?(roles, role_access) do
-      true -> {:ok, user_id}
-      false -> {:error, "Role is not valid."}
-    end
-  end
+  #   case Enum.member?(roles, role_access) do
+  #     true -> {:ok, user_id}
+  #     false -> {:error, "Role is not valid."}
+  #   end
+  # end
 
-  def validate(:restaurant, token) do
-    roles = ["RESTAURANT"]
-    %{"user_id" => user_id, "role_access" => role_access} = user_json(token)
+  # def validate(:restaurant, token) do
+  #   roles = ["RESTAURANT"]
+  #   %{"user_id" => user_id, "role_access" => role_access} = user_json(token)
 
-    case Enum.member?(roles, role_access) do
-      true -> {:ok, user_id}
-      false -> {:error, "Role is not valid."}
-    end
-  end
+  #   case Enum.member?(roles, role_access) do
+  #     true -> {:ok, user_id}
+  #     false -> {:error, "Role is not valid."}
+  #   end
+  # end
 
   def user_json(token) do
     # TODO fix validation. A reply might be :ok but not have the stuff I need
-    {:ok, %{status: 200, headers: _headers, body: body}} =
-      Peppermint.get(backend_verify(), params: %{cookie2: token})
+    case Peppermint.get(backend_verify(), params: %{cookie2: token}) do
+      {:ok, %{status: 200, headers: _headers, body: body}} ->
+        %{"data" => data} = Jason.decode!(body)
+        extract(data)
 
-    %{"data" => data} = Jason.decode!(body)
-    extract(data)
+      response ->
+        {:error, response}
+    end
   end
 
   defp extract(data) do

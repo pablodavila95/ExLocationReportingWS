@@ -30,8 +30,8 @@ defmodule DeliveryLocationServiceWeb.RestaurantSocket do
     case UserValidation.validate(:restaurant, token) do
       {:ok, user_id} ->
         {:ok, assign(socket, :restaurant_id, user_id)}
-      {:error, reason} ->
-        Logger.info("Couldn't connect to socket. Reason: #{reason}")
+      {:error, _} ->
+        Logger.info("Couldn't connect to socket.")
         :error
     end
 
