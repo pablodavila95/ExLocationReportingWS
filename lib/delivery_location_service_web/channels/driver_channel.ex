@@ -29,7 +29,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
         nil ->
           Logger.info("Created a new GS for #{driver_id}")
           LocationServer.create(driver_id)
-          Logger.info("Using default coordinates from frontend: {lat: #{lat}, long: #{long}")
+          # Logger.info("Using default coordinates from frontend: {lat: #{lat}, long: #{long}")
           send(self(), {:after_join, driver_id, %{lat: lat, long: long}})
           {:ok, socket}
       end
