@@ -19,6 +19,17 @@ defmodule DeliveryLocationServiceWeb.AdminSocket do
   # performing token verification on connect.
   @impl true
   def connect(%{"token" => token, "vsn" => _}, socket) do
+    {:ok, assign(socket, :admin_id, token)}
+
+    # case UserValidation.validate(:admin, token) do
+    #   {:ok, user_id} ->
+    #     {:ok, assign(socket, :admin_id, user_id)}
+
+    #   {:error, _} ->
+    #     Logger.info("Couldn't connect to socket.")
+    #     :error
+    # end
+
     # %{"user_id" => user_id, "role_access" => role_access} = UserValidation.user_json(token)
 
     # if role_access == "SUPER_ADMIN" or role_access == "ADMIN_COMPANY" do
@@ -26,14 +37,6 @@ defmodule DeliveryLocationServiceWeb.AdminSocket do
     # else
     #   :error
     # end
-
-    case UserValidation.validate(:admin, token) do
-      {:ok, user_id} ->
-        {:ok, assign(socket, :admin_id, user_id)}
-      {:error, _} ->
-        Logger.info("Couldn't connect to socket.")
-        :error
-    end
 
     # Refactor so it looks like traditional Phoenix auth validation
     # case Phoenix.Token.verify(socket, "player auth", token, max_age: 86400) do
