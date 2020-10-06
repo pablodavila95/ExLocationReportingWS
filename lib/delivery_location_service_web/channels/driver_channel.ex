@@ -14,7 +14,10 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   # TODO warn admins of large variations between locations
 
   def join("driver:" <> driver_id, %{"lat" => lat, "long" => long}, socket) do
-    if socket.assigns.driver_id == String.to_integer(driver_id) do
+    Logger.info(inspect(Integer.to_string(socket.assigns.driver_id)))
+    Logger.info(inspect(driver_id))
+    
+    if Integer.to_string(socket.assigns.driver_id) == driver_id do
       case LocationServer.location_data_pid(driver_id) do
         pid when is_pid(pid) ->
           Logger.info("GS already existed for driver #{driver_id}")
