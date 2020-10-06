@@ -35,6 +35,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
           {:ok, socket}
       end
     end
+    Logger.info("refusing connection because id doesnt match server reply")
     {:error, %{reason: "error while authenticating. ID doesn't match with server reply"}}
   end
 
