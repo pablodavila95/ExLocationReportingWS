@@ -15,6 +15,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
 
   def join("driver:" <> driver_id, %{"lat" => lat, "long" => long}, socket) do
     Logger.info(inspect(socket.assigns.driver_id))
+    Logger.info(inspect(driver_id))
 
     if socket.assigns.driver_id == driver_id do
       case LocationServer.location_data_pid(driver_id) do
