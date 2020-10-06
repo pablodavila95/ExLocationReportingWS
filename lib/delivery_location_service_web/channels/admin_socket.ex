@@ -19,16 +19,16 @@ defmodule DeliveryLocationServiceWeb.AdminSocket do
   # performing token verification on connect.
   @impl true
   def connect(%{"token" => token, "vsn" => _}, socket) do
-    {:ok, assign(socket, :admin_id, token)}
+    # {:ok, assign(socket, :admin_id, token)}
 
-    # case UserValidation.validate(:admin, token) do
-    #   {:ok, user_id} ->
-    #     {:ok, assign(socket, :admin_id, user_id)}
+    case UserValidation.validate(:admin, token) do
+      {:ok, user_id} ->
+        {:ok, assign(socket, :admin_id, user_id)}
 
-    #   {:error, _} ->
-    #     Logger.info("Couldn't connect to socket.")
-    #     :error
-    # end
+      {:error, _} ->
+        Logger.info("Couldn't connect to socket.")
+        :error
+    end
 
     # %{"user_id" => user_id, "role_access" => role_access} = UserValidation.user_json(token)
 

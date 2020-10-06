@@ -5,6 +5,7 @@ defmodule DeliveryLocationServiceWeb.DriverSocket do
 
   ## Channels
   channel "driver:*", DeliveryLocationServiceWeb.DriverChannel
+  channel "notifications", DeliveryLocationServiceWeb.DriverNotifications
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After

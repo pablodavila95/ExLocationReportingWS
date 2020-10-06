@@ -7,7 +7,7 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   alias DeliveryLocationService.LocationsHelper
   alias DeliveryLocationServiceWeb.Endpoint
 
-  def join("restaurant" <> restaurant_id, _params, socket) do
+  def join("restaurant:" <> restaurant_id, _params, socket) do
     if socket.assigns.restaurant_id == restaurant_id do
       send(self(), {:after_join})
       {:ok, socket |> assign(:drivers, []) |> assign(:restaurant_id, restaurant_id)}
@@ -15,7 +15,7 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   end
 
   def handle_info({:after_join}, socket) do
-    "restaurant" <> restaurant_id = socket.topic
+    "restaurant:" <> restaurant_id = socket.topic
 
     LocationsHelper.get_orders_for(restaurant_id)
     |> Enum.map(fn driver_data -> driver_data.driver_id end)
@@ -40,6 +40,11 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   def handle_in("finished_delivering", %{"driver_id" => driver_id}, socket) do
     Endpoint.unsubscribe("driver:#{driver_id}")
     {:reply, :ok, socket}
+  end
+
+  def handle_in("notify_new_order", %{"order_details" => order_details}, socket) do
+    Endpoint.broadcast!("notifications", "notify_drivers", order_details)
+    {:noreply, socket}
   end
 
   defp put_new_driver(socket, driver) do
