@@ -16,7 +16,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   def join("driver:" <> driver_id, %{"lat" => lat, "long" => long}, socket) do
     Logger.info(inspect(Integer.to_string(socket.assigns.driver_id)))
     Logger.info(inspect(driver_id))
-    
+
     if Integer.to_string(socket.assigns.driver_id) == driver_id do
       case LocationServer.location_data_pid(driver_id) do
         pid when is_pid(pid) ->
@@ -37,10 +37,10 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
           send(self(), {:after_join, driver_id, %{"lat" => lat, "long" => long}})
           {:ok, socket}
       end
+    else
+      Logger.info("refusing connection because id doesnt match server reply")
+      {:error, %{reason: "error while authenticating. ID doesn't match with server reply"}}
     end
-
-    Logger.info("refusing connection because id doesnt match server reply")
-    {:error, %{reason: "error while authenticating. ID doesn't match with server reply"}}
   end
 
   def handle_info({:after_join, driver_id, coordinates}, socket) do
