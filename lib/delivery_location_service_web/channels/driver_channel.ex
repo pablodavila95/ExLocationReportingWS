@@ -14,6 +14,8 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   # TODO warn admins of large variations between locations
 
   def join("driver:" <> driver_id, %{"lat" => lat, "long" => long}, socket) do
+    Logger.info(inspect(socket.assigns.driver_id))
+
     if socket.assigns.driver_id == driver_id do
       case LocationServer.location_data_pid(driver_id) do
         pid when is_pid(pid) ->
@@ -35,6 +37,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
           {:ok, socket}
       end
     end
+
     Logger.info("refusing connection because id doesnt match server reply")
     {:error, %{reason: "error while authenticating. ID doesn't match with server reply"}}
   end
