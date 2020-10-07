@@ -1,6 +1,7 @@
 defmodule DeliveryLocationService.UserValidation do
+  require Logger
   defp backend_verify() do
-    api_url = System.get_env("API_URL") || "https://79668a708ae1.ngrok.io"
+    api_url = System.get_env("API_URL") || "http://delivery.aztlansoft.com"
     api_url <> "/verify/token"
   end
 
@@ -13,6 +14,7 @@ defmodule DeliveryLocationService.UserValidation do
     }
 
     roles = Map.get(available_roles, user_role)
+    Logger.info("Validating with any of these roles: ", inspect(roles))
 
     case user_json(token) do
       %{"user_id" => user_id, "role_access" => role_access} ->
