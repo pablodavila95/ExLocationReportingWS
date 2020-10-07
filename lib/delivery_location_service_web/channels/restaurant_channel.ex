@@ -9,8 +9,8 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   require Logger
 
   def join("restaurant:" <> restaurant_id, _params, socket) do
-    Logger.info("server said", inspect(Integer.to_string(socket.assigns.restaurant_id)))
-    Logger.info("user said", inspect(restaurant_id))
+    Logger.info(inspect(socket.assigns.restaurant_id))
+    Logger.info(inspect(restaurant_id))
 
     if Integer.to_string(socket.assigns.restaurant_id) == restaurant_id do
       send(self(), {:after_join})
