@@ -60,7 +60,7 @@ defmodule DeliveryLocationServiceWeb.RestaurantSocket do
   #
   # Returning `nil` makes this socket anonymous.
   @impl true
-  def id(socket), do: "driver_socket:#{socket.assigns.restaurant_id}"
+  def id(socket), do: "restaurant_socket:#{socket.assigns.restaurant_id}"
 
   # Terminate with
   # DeliveryLocationServiceWeb.Endpoint.broadcast("driver_socket:#{driver.id}", "disconnect", %{})
