@@ -14,7 +14,7 @@ defmodule DeliveryLocationService.UserValidation do
     }
 
     roles = Map.get(available_roles, user_role)
-    Logger.info("Validating with any of these roles: ", inspect(roles))
+    Logger.info("Validating with any of these roles: #{roles}")
 
     case user_json(token) do
       %{"user_id" => user_id, "role_access" => role_access} ->
