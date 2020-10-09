@@ -1,5 +1,6 @@
 defmodule DeliveryLocationService.UserValidation do
   require Logger
+
   defp backend_verify() do
     api_url = System.get_env("API_URL") || "http://delivery.aztlansoft.com"
     api_url <> "/verify/token"
@@ -63,13 +64,13 @@ defmodule DeliveryLocationService.UserValidation do
   defp extract(data) do
     # Roles: SUPER_ADMIN | ADMIN_COMPANY | RESTAURANT | DRIVER
 
-    case Map.get(data, "customerCompany") do
+    case Map.get(data, "customerClient") do
       nil ->
         %{"id" => user_id, "roleAccess" => role_access} = data
         %{"user_id" => user_id, "role_access" => role_access}
 
       _ ->
-        %{"roleAccess" => role_access, "customerCompany" => %{"id" => user_id}} = data
+        %{"roleAccess" => role_access, "customerClient" => %{"id" => user_id}} = data
         %{"user_id" => user_id, "role_access" => role_access}
     end
 
