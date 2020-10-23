@@ -22,7 +22,7 @@ defmodule DeliveryLocationServiceWeb.AdminSocket do
     # {:ok, assign(socket, :admin_id, token)}
 
     case UserValidation.validate(:admin, token) do
-      {:ok, user_id} ->
+      {:ok, admin_id} ->
         {:ok, assign(socket, :admin_id, admin_id)}
 
       {:error, _} ->
