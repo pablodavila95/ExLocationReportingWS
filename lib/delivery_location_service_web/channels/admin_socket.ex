@@ -23,7 +23,7 @@ defmodule DeliveryLocationServiceWeb.AdminSocket do
 
     case UserValidation.validate(:admin, token) do
       {:ok, user_id} ->
-        {:ok, assign(socket, :admin_id, user_id)}
+        {:ok, assign(socket, :admin_id, admin_id)}
 
       {:error, _} ->
         Logger.info("Couldn't connect to socket.")

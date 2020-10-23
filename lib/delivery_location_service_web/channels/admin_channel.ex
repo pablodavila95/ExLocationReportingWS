@@ -5,10 +5,20 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
   """
   use DeliveryLocationServiceWeb, :channel
   alias DeliveryLocationService.LocationsHelper
+  require Logger
 
-  def join("admins", _params, socket) do
-    send(self(), {:after_join})
-    {:ok, socket}
+  def join("admins", %{"admin_id" => admin_id}, socket) do
+
+    Logger.info(inspect(socket.assigns.admin_id))
+    Logger.info(inspect(admin_id))
+
+    if Integer.to_string(socket.assigns.admin_id) == admin_id do
+      send(self(), {:after_join})
+      {:ok, socket}
+    end
+
+    # send(self(), {:after_join})
+    # {:ok, socket}
   end
 
   def handle_info({:after_join}, socket) do
