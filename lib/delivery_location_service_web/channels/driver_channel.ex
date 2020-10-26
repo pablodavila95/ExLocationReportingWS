@@ -180,6 +180,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   defp push_data_to_admins(driver_id) do
     data = get_state(driver_id)
     Logger.info("Sending data to admins.")
+    Logger.info(inspect(data))
 
     Endpoint.broadcast!("admins", "driver_update", data)
   end
