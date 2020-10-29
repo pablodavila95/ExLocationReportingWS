@@ -20,19 +20,12 @@ defmodule DeliveryLocationServiceWeb.DriverSocket do
   # performing token verification on connect.
   @impl true
   def connect(%{"token" => token, "vsn" => _}, socket) do
-    # %{"user_id" => user_id, "role_access" => role_access} = UserValidation.user_json(token)
-    # if role_access == "DRIVER" do
-    #   {:ok, assign(socket, :driver_id, user_id)} #put user_id back
-    # else
-    #   :error
-    # end
-    # {:ok, assign(socket, :driver_id, 1)}
-
     case UserValidation.validate(:driver, token) do
       {:ok, user_id} ->
         {:ok, assign(socket, :driver_id, user_id)}
 
-      {:error, _} ->
+      {:error, message} ->
+        Logger.info(inspect(message))
         Logger.info("Couldn't connect to socket.")
         :error
     end

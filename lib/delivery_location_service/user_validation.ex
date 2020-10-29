@@ -29,31 +29,14 @@ defmodule DeliveryLocationService.UserValidation do
     end
   end
 
-  # def validate(:admin, token) do
-  #   roles = ["SUPER_ADMIN", "ADMIN_COMPANY"]
-  #   %{"user_id" => user_id, "role_access" => role_access} = user_json(token)
-
-  #   case Enum.member?(roles, role_access) do
-  #     true -> {:ok, user_id}
-  #     false -> {:error, "Role is not valid."}
-  #   end
-  # end
-
-  # def validate(:restaurant, token) do
-  #   roles = ["RESTAURANT"]
-  #   %{"user_id" => user_id, "role_access" => role_access} = user_json(token)
-
-  #   case Enum.member?(roles, role_access) do
-  #     true -> {:ok, user_id}
-  #     false -> {:error, "Role is not valid."}
-  #   end
-  # end
 
   def user_json(token) do
     # TODO fix validation. A reply might be :ok but not have the stuff I need
     case Peppermint.get(backend_verify(), params: %{cookie2: token}) do
       {:ok, %{status: 200, headers: _headers, body: body}} ->
         %{"data" => data} = Jason.decode!(body)
+
+        Logger.info(inspect(data))
         extract(data)
 
       response ->
@@ -73,13 +56,5 @@ defmodule DeliveryLocationService.UserValidation do
         %{"roleAccess" => role_access, "customerClient" => %{"id" => user_id}} = data
         %{"user_id" => user_id, "role_access" => role_access}
     end
-
-    # if Map.get(data, "customerCompany") != nil do
-    #   %{"roleAccess" => role_access, "customerCompany" => %{"id" => user_id}} = data
-    #   %{"user_id" => user_id, "role_access" => role_access}
-    # else
-    #   %{"id" => user_id, "roleAccess" => role_access} = data
-    #   %{"user_id" => user_id, "role_access" => role_access}
-    # end
   end
 end
