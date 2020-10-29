@@ -2,7 +2,7 @@ defmodule DeliveryLocationService.UserValidation do
   require Logger
 
   defp backend_verify do
-    api_url = System.get_env("API_URL") || "http://delivery.aztlansoft.com"
+    api_url = System.get_env("API_URL") || "https://delivery.aztlansoft.com"
     api_url <> "/verify/token"
   end
 
