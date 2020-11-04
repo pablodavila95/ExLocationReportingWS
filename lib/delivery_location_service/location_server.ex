@@ -110,6 +110,7 @@ defmodule DeliveryLocationService.LocationServer do
   end
 
   def handle_cast({:update_order, new_current_order}, location_data) do
+    Logger.info("updating current order")
     new_location_data = Location.update_order(location_data, new_current_order, Time.utc_now())
     :ets.insert(:locations_table, {location_data_driver_id(), new_location_data})
     {:noreply, new_location_data}

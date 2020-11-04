@@ -25,6 +25,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
           # %{coordinates: %{"lat" => existing_lat, "long" => existing_long}} = get_state(driver_id)
           existing_lat = Map.get(Map.get(get_state(driver_id), :coordinates), :lat)
           existing_long = Map.get(Map.get(get_state(driver_id), :coordinates), :long)
+          LocationServer.update_order(driver_id, Map.get(get_state(driver_id), :current_order))
 
           Logger.info("Reusing existing coordinates.")
           send(self(), {:after_join, driver_id, %{lat: existing_lat, long: existing_long}})
