@@ -18,9 +18,9 @@ defmodule DeliveryLocationService.UserValidation do
     Logger.info("Validating with any of these roles: #{roles}")
 
     case user_json(token) do
-      %{"user_id" => user_id, "role_access" => role_access} ->
+      %{"user_id" => user_id, "role_access" => role_access, "customer_company" => customer_company} ->
         case Enum.member?(roles, role_access) do
-          true -> {:ok, user_id}
+          true -> {:ok, [user_id, customer_company]}
           false -> {:error, "Role is not valid."}
         end
 
@@ -49,8 +49,8 @@ defmodule DeliveryLocationService.UserValidation do
 
     case Map.get(data, "customerClient") do
       nil ->
-        %{"id" => user_id, "roleAccess" => role_access} = data
-        %{"user_id" => user_id, "role_access" => role_access}
+        %{"id" => user_id, "roleAccess" => role_access, "customerCompany" => customer_company} = data
+        %{"user_id" => user_id, "role_access" => role_access, "customer_company" => customer_company}
 
       _ ->
         %{"roleAccess" => role_access, "customerClient" => %{"id" => user_id}} = data

@@ -48,6 +48,8 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     # Update coordinates after join. Assign to a value.
     LocationServer.update_coordinates(driver_id, coordinates)
 
+    Endpoint.broadcast!("admins:#{socket.assign.customer_company}", "driver_connected", %{"driver_id" => socket.assign.driver_id})
+
     # updated_coordinates =
     #   LocationServer.location_data_pid(driver_id) |> :sys.get_state() |> Map.get(:coordinates)
 
@@ -58,7 +60,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
 
     Endpoint.broadcast!("admins", "logs", %{message: "Driver #{driver_id} just connected"})
 
-    push_data_to_admins(driver_id)
+    push_data_to_admins(driver_id, socket)
 
     # Presence stuff
     {:ok, _} =
@@ -105,7 +107,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
       )
     end
 
-    push_data_to_admins(driver_id)
+    push_data_to_admins(driver_id, socket)
 
     {:noreply, socket}
   end
@@ -123,7 +125,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
       driver_id: driver_id
     })
 
-    push_data_to_admins(driver_id)
+    push_data_to_admins(driver_id, socket)
 
     {:noreply, socket}
   end
@@ -147,7 +149,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
       })
     end
 
-    push_data_to_admins(driver_id)
+    push_data_to_admins(driver_id, socket)
 
     {:noreply, socket}
   end
@@ -178,12 +180,12 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     |> Map.from_struct()
   end
 
-  defp push_data_to_admins(driver_id) do
+  defp push_data_to_admins(driver_id, socket) do
     data = get_state(driver_id)
     Logger.info("Sending data to admins.")
     Logger.info(inspect(data))
 
-    Endpoint.broadcast!("admins", "driver_update", data)
+    Endpoint.broadcast!("admins:#{socket.assign.customer_company}", "driver_update", data)
   end
 
   # Only for reference

@@ -5,9 +5,10 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
   """
   use DeliveryLocationServiceWeb, :channel
   alias DeliveryLocationService.LocationsHelper
+  alias DeliveryLocationServiceWeb.Endpoint
   require Logger
 
-  def join("admins", %{"admin_id" => admin_id}, socket) do
+  def join("admins:" <> admin_id, %{"admin_id" => admin_id}, socket) do
 
     Logger.info(inspect(socket.assigns.admin_id))
     Logger.info(inspect(admin_id))
@@ -31,5 +32,27 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
   def handle_in("driver_update", %{"data" => data}, socket) do
     broadcast!(socket, "driver_update", data)
     {:noreply, socket}
+  end
+
+  def handle_in("driver_connected", %{"driver_id" => driver_id}, socket) do
+    {:reply, :ok, put_new_driver(socket, driver_id)}
+  end
+
+  def handle_in("driver_disconnected", %{"driver_id" => driver_id}, socket) do
+    Endpoint.unsubscribe("driver:#{driver_id}")
+    {:reply, :ok, socket}
+  end
+
+  defp put_new_driver(socket, driver) do
+    Enum.reduce(driver, socket, fn driver, acc ->
+      drivers = acc.assigns.drivers
+
+      if driver in drivers do
+        acc
+      else
+        :ok = Endpoint.subscribe("driver:#{driver}")
+        assign(acc, :topics, [driver | drivers])
+      end
+    end)
   end
 end

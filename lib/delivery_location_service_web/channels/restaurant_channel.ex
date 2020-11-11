@@ -63,4 +63,5 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
       end
     end)
   end
+  
 end

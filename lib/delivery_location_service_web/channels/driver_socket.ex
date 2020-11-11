@@ -21,7 +21,8 @@ defmodule DeliveryLocationServiceWeb.DriverSocket do
   @impl true
   def connect(%{"token" => token, "vsn" => _}, socket) do
     case UserValidation.validate(:driver, token) do
-      {:ok, user_id} ->
+      {:ok, [user_id, customer_company]} ->
+        socket = assign(socket, :customer_company, customer_company)
         {:ok, assign(socket, :driver_id, user_id)}
 
       {:error, message} ->
