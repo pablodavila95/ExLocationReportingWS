@@ -22,8 +22,8 @@ defmodule DeliveryLocationServiceWeb.AdminSocket do
     # {:ok, assign(socket, :admin_id, token)}
 
     case UserValidation.validate(:admin, token) do
-      {:ok, admin_id} ->
-        {:ok, assign(socket, :admin_id, admin_id)}
+      {:ok, %{user_id: admin_id, customer_company: customer_company}} ->
+        {:ok, assign(assign(socket, :customer_company, customer_company), :admin_id, admin_id)}
 
       {:error, _} ->
         Logger.info("Couldn't connect to socket.")
