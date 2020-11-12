@@ -49,7 +49,7 @@ defmodule DeliveryLocationService.UserValidation do
 
     case Map.get(data, "customerClient") do
       nil ->
-        %{"id" => user_id, "roleAccess" => role_access, "customerCompany" => customer_company} = data
+        %{"id" => user_id, "roleAccess" => role_access, "customerCompany" => %{"id" => customer_company}} = data
         %{"user_id" => user_id, "role_access" => role_access, "customer_company" => customer_company}
 
       _ ->
