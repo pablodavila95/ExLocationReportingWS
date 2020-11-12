@@ -4,7 +4,7 @@ defmodule DeliveryLocationServiceWeb.AdminSocket do
   alias DeliveryLocationService.UserValidation
 
   ## Channels
-  channel "admins", DeliveryLocationServiceWeb.AdminChannel
+  channel "admins:*", DeliveryLocationServiceWeb.AdminChannel
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After

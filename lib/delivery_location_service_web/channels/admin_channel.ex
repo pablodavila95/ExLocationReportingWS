@@ -8,7 +8,7 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
   alias DeliveryLocationServiceWeb.Endpoint
   require Logger
 
-  def join("admins:" <> admin_id, _params, socket) do
+  def join("admins:" <> customer_company, %{"adminID" => admin_id}, socket) do
 
     Logger.info(inspect(socket.assigns.admin_id))
     Logger.info(inspect(admin_id))
