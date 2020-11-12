@@ -48,7 +48,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     # Update coordinates after join. Assign to a value.
     LocationServer.update_coordinates(driver_id, coordinates)
 
-    Endpoint.broadcast!("admins:#{socket.assign.customer_company}", "driver_connected", %{"driver_id" => socket.assign.driver_id})
+    Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "driver_connected", %{"driver_id" => socket.assigns.driver_id})
 
     # updated_coordinates =
     #   LocationServer.location_data_pid(driver_id) |> :sys.get_state() |> Map.get(:coordinates)
@@ -185,7 +185,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     Logger.info("Sending data to admins.")
     Logger.info(inspect(data))
 
-    Endpoint.broadcast!("admins:#{socket.assign.customer_company}", "driver_update", data)
+    Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "driver_update", data)
   end
 
   # Only for reference

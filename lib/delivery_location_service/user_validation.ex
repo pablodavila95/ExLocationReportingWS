@@ -20,7 +20,7 @@ defmodule DeliveryLocationService.UserValidation do
     case user_json(token) do
       %{"user_id" => user_id, "role_access" => role_access, "customer_company" => customer_company} ->
         case Enum.member?(roles, role_access) do
-          true -> {:ok, [user_id, customer_company]}
+          true -> {:ok, %{user_id: user_id, customer_company: customer_company}}
           false -> {:error, "Role is not valid."}
         end
 
