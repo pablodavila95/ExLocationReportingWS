@@ -24,6 +24,12 @@ defmodule DeliveryLocationService.UserValidation do
           false -> {:error, "Role is not valid."}
         end
 
+      %{"user_id" => user_id, "role_access" => role_access} ->
+        case Enum.member?(roles, role_access) do
+          true -> {:ok, user_id}
+          false -> {:error, "Role is not valid."}
+        end
+
       error ->
         error
     end
