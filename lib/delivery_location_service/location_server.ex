@@ -13,7 +13,7 @@ defmodule DeliveryLocationService.LocationServer do
   alias DeliveryLocationService.Location
   require Logger
 
-  # @timeout :timer.minutes(15)
+  @timeout :timer.minutes(15)
 
   def create(driver_id) do
     case location_data_pid(driver_id) do
@@ -83,13 +83,13 @@ defmodule DeliveryLocationService.LocationServer do
       end
 
     Logger.info("Spawned a location_data for a driver with id '#{driver_id}'.")
-    {:ok, location_data}
-    # {:ok, location_data, @timeout}
+    # {:ok, location_data}
+    {:ok, location_data, @timeout}
   end
 
   def handle_call(:view, _from, location_data) do
-    {:reply, view_data(location_data), location_data}
-    # {:reply, view_data(location_data), location_data, @timeout}
+    # {:reply, view_data(location_data), location_data}
+    {:reply, view_data(location_data), location_data, @timeout}
   end
 
   def handle_cast({:update_coordinates, %{} = new_coordinates}, location_data) do
@@ -98,22 +98,23 @@ defmodule DeliveryLocationService.LocationServer do
 
     :ets.insert(:locations_table, {location_data_driver_id(), new_location_data})
 
-    {:noreply, new_location_data}
-    # {:noreply, new_location_data, @timeout}
+    # {:noreply, new_location_data}
+    {:noreply, new_location_data, @timeout}
   end
 
   def handle_cast({:update_restaurant, new_restaurant}, location_data) do
     new_location_data = Location.update_restaurant(location_data, new_restaurant, Time.utc_now())
     :ets.insert(:locations_table, {location_data_driver_id(), new_location_data})
-    {:noreply, new_location_data}
-    # {:noreply, new_location_data, @timeout}
+    # {:noreply, new_location_data}
+    {:noreply, new_location_data, @timeout}
   end
 
   def handle_cast({:update_order, new_current_order}, location_data) do
     Logger.info("updating current order")
     new_location_data = Location.update_order(location_data, new_current_order, Time.utc_now())
     :ets.insert(:locations_table, {location_data_driver_id(), new_location_data})
-    {:noreply, new_location_data}
+    # {:noreply, new_location_data}
+    {:noreply, new_location_data, @timeout}
   end
 
   def handle_info(:timeout, location_data) do
