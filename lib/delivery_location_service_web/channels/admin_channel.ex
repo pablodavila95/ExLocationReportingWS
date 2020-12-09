@@ -43,6 +43,11 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
     {:reply, :ok, socket}
   end
 
+  def handle_in("remove_order_from_driver", %{"driver_id" => driver_id}, socket) do
+    Endpoint.broadcast!("driver:" <> driver_id ,"admin_removed_order", %{})
+    {:reply, :ok, socket}
+  end
+
   defp put_new_driver(socket, driver) do
     Enum.reduce(driver, socket, fn driver, acc ->
       drivers = acc.assigns.drivers
