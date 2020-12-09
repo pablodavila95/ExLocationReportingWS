@@ -157,7 +157,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   end
 
   def handle_in("admin_removed_order", %{"driver_id" => driver_id}, socket) do
-    Logger.info("An admin is attempting to remove an order")
+    Logger.info("An admin is attempting to remove an order !")
 
     restaurant_id_server = LocationServer.view(driver_id).restaurant_id
     order_id_server = LocationServer.view(driver_id).current_order
