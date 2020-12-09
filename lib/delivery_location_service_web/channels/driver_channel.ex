@@ -59,7 +59,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
       message: "Connected to Channel successfully"
     })
 
-    Endpoint.broadcast!("admins", "logs", %{message: "Driver #{driver_id} just connected"})
+    Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "logs", %{message: "Driver #{driver_id} just connected"})
 
     push_data_to_admins(driver_id, socket)
 
@@ -70,14 +70,14 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
         is_delivering: inspect(LocationsHelper.is_delivering?(driver_id))
       })
 
-    Endpoint.broadcast!("admins", "presence_state", Presence.list(socket))
+    Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "presence_state", Presence.list(socket))
 
     Logger.info("A driver connected")
     {:noreply, socket}
   end
 
   def handle_in("presence_diff", diff, socket) do
-    Endpoint.broadcast!("admins", "presence_diff", diff)
+    Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "presence_diff", diff)
     {:noreply, socket}
   end
 
