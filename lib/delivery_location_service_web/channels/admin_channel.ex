@@ -45,7 +45,7 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
 
   def handle_in("remove_order_from_driver", %{"driver_id" => driver_id}, socket) do
     Logger.info("Got a message to remove an order from the driver")
-    Endpoint.broadcast!("driver:" <> driver_id ,"admin_removed_order", %{})
+    Endpoint.broadcast!("driver:" <> driver_id ,"admin_removed_order", %{"driver_id" => driver_id})
     {:reply, :ok, socket}
   end
 
