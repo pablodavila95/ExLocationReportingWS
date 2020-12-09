@@ -135,6 +135,8 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
         %{"restaurant_id" => restaurant_id_client, "order_id" => order_id_client},
         socket
       ) do
+
+    Logger.info("Order is finished. Removing...")
     "driver:" <> driver_id = socket.topic
     LocationServer.update_restaurant(driver_id, nil)
     LocationServer.update_order(driver_id, nil)
@@ -155,10 +157,13 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   end
 
   def handle_in("admin_removed_order", _, socket) do
+    Logger.info("An admin is attempting to remove an order")
     "driver:" <> driver_id = socket.topic
-    current_order = LocationServer.view(driver_id).current_order
-    current_restaurant = LocationServer.view(driver_id).restaurant_id
-    Endpoint.broadcast("driver:" <> driver_id, "finished_order", %{"restaurant_id" => current_restaurant, "order_id" => current_order})
+    driver_state = get_state(driver_id)
+    current_order = Map.get(driver_state, "current_order")
+    current_restaurant = Map.get(driver_state, "restaurant_id")
+
+    Endpoint.broadcast!("driver:" <> driver_id, "finished_order", %{"restaurant_id" => current_restaurant, "order_id" => current_order})
     {:noreply, socket}
   end
 
