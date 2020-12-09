@@ -154,7 +154,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     {:noreply, socket}
   end
 
-  def handle_in("admin_removed_order". %{}, socket) do
+  def handle_in("admin_removed_order". _, socket) do
     "driver:" <> driver_id = socket.topic
     current_order = LocationServer.view(driver_id).current_order
     current_restaurant = LocationServer.view(driver_id).restaurant_id
