@@ -159,11 +159,18 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   def handle_in("admin_removed_order", %{"driver_id" => driver_id}, socket) do
     Logger.info("An admin is attempting to remove an order")
 
-    driver_state = get_state(driver_id)
-    current_order = Map.get(driver_state, "current_order")
-    current_restaurant = Map.get(driver_state, "restaurant_id")
+    restaurant_id_server = LocationServer.view(driver_id).restaurant_id
+    order_id_server = LocationServer.view(driver_id).current_order
 
-    Endpoint.broadcast!("driver:" <> driver_id, "finished_order", %{"restaurant_id" => current_restaurant, "order_id" => current_order})
+    Endpoint.broadcast!("restaurant:#{restaurant_id_server}", "finished_delivering", %{
+      driver_id: driver_id,
+      order_id: order_id_server
+    })
+
+    LocationServer.update_restaurant(driver_id, nil)
+    LocationServer.update_order(driver_id, nil)
+
+    push_data_to_admins(driver_id, socket)
     {:noreply, socket}
   end
 
