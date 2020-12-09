@@ -47,6 +47,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   def handle_info({:after_join, driver_id, coordinates}, socket) do
     # Update coordinates after join. Assign to a value.
     LocationServer.update_coordinates(driver_id, coordinates)
+    Logger.info("Socket topic is #{socket.topic}")
 
     Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "driver_connected", %{"driver_id" => socket.assigns.driver_id})
 
