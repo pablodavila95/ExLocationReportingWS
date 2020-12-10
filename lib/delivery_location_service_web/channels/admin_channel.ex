@@ -46,7 +46,7 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
   def handle_in("remove_order_from_driver_process", %{"driver_id" => driver_id}, socket) do
     Logger.info("Deleting order from the driver GenServer process")
 
-    parsed_driver_id = String.to_int(driver_id)
+    parsed_driver_id = String.to_integer(driver_id)
 
     LocationsHelper.reset_order(parsed_driver_id)
     LocationsHelper.reset_restaurant(parsed_driver_id)
