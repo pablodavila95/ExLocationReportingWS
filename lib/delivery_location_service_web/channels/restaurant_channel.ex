@@ -43,6 +43,9 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   end
 
   def handle_in("finished_delivering", %{"driver_id" => driver_id}, socket) do
+    current_orders = Map.from_struct(LocationsHelper.get_orders_for(socket.assigns.restaurant_id))
+    push(socket, "refresh_map", current_orders)
+
     Endpoint.unsubscribe("driver:#{driver_id}")
     {:reply, :ok, socket}
   end
