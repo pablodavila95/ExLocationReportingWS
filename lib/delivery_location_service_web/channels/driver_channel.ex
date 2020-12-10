@@ -108,6 +108,10 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
         "driver_update",
         Map.from_struct(current_state)
       )
+    else
+      Endpoint.broadcast!("restaurant:#{current_restaurant_id}", "finished_delivering", %{
+        driver_id: driver_id,
+        })
     end
 
     push_data_to_admins(driver_id, socket)
@@ -148,7 +152,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     if restaurant_id_client == restaurant_id_server and order_id_client == order_id_server do
       Endpoint.broadcast!("restaurant:#{restaurant_id_server}", "finished_delivering", %{
         driver_id: driver_id,
-        order_id: order_id_server
+        # order_id: order_id_server
         })
       end
 
