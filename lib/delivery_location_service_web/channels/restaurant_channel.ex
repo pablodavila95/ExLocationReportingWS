@@ -42,9 +42,24 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
     {:noreply, socket}
   end
 
-  def handle_in("finished_delivering", %{"driver_id" => driver_id}, socket) do
+  def handle_in("send_map_updates_and_unsubscribe_from_driver", %{"driver_id" => driver_id}, socket) do
     current_orders = Map.from_struct(LocationsHelper.get_orders_for(socket.assigns.restaurant_id))
     push(socket, "refresh_map", current_orders)
+    Endpoint.unsubscribe("driver:#{driver_id}")
+    {:reply, :ok, socket}
+  end
+
+  def handle_in("remove_order_from_driver_process", %{"driver_id" => driver_id}, socket) do
+    Logger.info("Restaurant is deleting order from the driver GenServer process #{driver_id}")
+
+    LocationsHelper.reset_order(driver_id)
+    LocationsHelper.reset_restaurant(driver_id)
+    {:noreply, socket}
+  end
+
+  def handle_in("finished_delivering", %{"driver_id" => driver_id}, socket) do
+    # current_orders = Map.from_struct(LocationsHelper.get_orders_for(socket.assigns.restaurant_id))
+    # push(socket, "refresh_map", current_orders)
 
     Endpoint.unsubscribe("driver:#{driver_id}")
     {:reply, :ok, socket}
