@@ -50,7 +50,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     Logger.info("Socket topic is #{socket.topic}")
 
 
-    # Endpoint.subscribe("admins:#{socket.assigns.customer_company}")
+    Endpoint.subscribe("admins:#{socket.assigns.customer_company}")
     Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "driver_connected", %{"driver_id" => socket.assigns.driver_id})
 
     # updated_coordinates =
@@ -157,19 +157,6 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
 
     push_data_to_admins(driver_id, socket)
 
-    {:noreply, socket}
-  end
-
-  def handle_info(%{message: admin_finished_order, data: %{"restaurant_id" => restaurant_id, "order_id" => order_id, "driver_id" => driver_id}}, socket) do
-    Logger.info("Handle info is removing order!!!")
-
-    Endpoint.broadcast!("restaurant:#{restaurant_id}", "finished_delivering", %{
-      driver_id: driver_id,
-      order_id: order_id
-    })
-
-    LocationServer.update_restaurant(driver_id, nil)
-    LocationServer.update_order(driver_id, nil)
     {:noreply, socket}
   end
 
