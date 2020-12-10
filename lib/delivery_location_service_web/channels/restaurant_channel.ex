@@ -33,6 +33,7 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   end
 
   def handle_in("driver_delivering", %{"driver_id" => driver_id}, socket) do
+    Logger.info("Putting new driver in assigns")
     {:reply, :ok, put_new_driver(socket, driver_id)}
   end
 
@@ -63,5 +64,5 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
       end
     end)
   end
-  
+
 end

@@ -49,6 +49,8 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     LocationServer.update_coordinates(driver_id, coordinates)
     Logger.info("Socket topic is #{socket.topic}")
 
+
+    # Endpoint.subscribe("admins:#{socket.assigns.customer_company}")
     Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "driver_connected", %{"driver_id" => socket.assigns.driver_id})
 
     # updated_coordinates =
@@ -139,8 +141,6 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
 
     Logger.info("Order is finished. Removing...")
     "driver:" <> driver_id = socket.topic
-    LocationServer.update_restaurant(driver_id, nil)
-    LocationServer.update_order(driver_id, nil)
 
     restaurant_id_server = LocationServer.view(driver_id).restaurant_id
     order_id_server = LocationServer.view(driver_id).current_order
@@ -149,11 +149,27 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
       Endpoint.broadcast!("restaurant:#{restaurant_id_server}", "finished_delivering", %{
         driver_id: driver_id,
         order_id: order_id_server
-      })
-    end
+        })
+      end
+
+    LocationServer.update_restaurant(driver_id, nil)
+    LocationServer.update_order(driver_id, nil)
 
     push_data_to_admins(driver_id, socket)
 
+    {:noreply, socket}
+  end
+
+  def handle_info(%{message: admin_finished_order, data: %{"restaurant_id" => restaurant_id, "order_id" => order_id, "driver_id" => driver_id}}, socket) do
+    Logger.info("Handle info is removing order!!!")
+
+    Endpoint.broadcast!("restaurant:#{restaurant_id}", "finished_delivering", %{
+      driver_id: driver_id,
+      order_id: order_id
+    })
+
+    LocationServer.update_restaurant(driver_id, nil)
+    LocationServer.update_order(driver_id, nil)
     {:noreply, socket}
   end
 
