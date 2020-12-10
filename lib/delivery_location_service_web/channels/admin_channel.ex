@@ -4,7 +4,6 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
   Any update from the drivers gets sent to the channel.
   """
   use DeliveryLocationServiceWeb, :channel
-  alias DeliveryLocationService.LocationServer
   alias DeliveryLocationService.LocationsHelper
   alias DeliveryLocationServiceWeb.Endpoint
   require Logger
@@ -47,8 +46,10 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
   def handle_in("remove_order_from_driver_process", %{"driver_id" => driver_id}, socket) do
     Logger.info("Deleting order from the driver GenServer process")
 
-    LocationServer.update_restaurant(driver_id, nil)
-    LocationServer.update_order(driver_id, nil)
+    parsed_driver_id = String.to_int(driver_id)
+
+    LocationsHelper.reset_order(parsed_driver_id)
+    LocationsHelper.reset_restaurant(parsed_driver_id)
     {:noreply, socket}
   end
 
