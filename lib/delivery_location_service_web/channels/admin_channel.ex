@@ -35,12 +35,12 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
   end
 
   def handle_in("driver_connected", %{"driver_id" => driver_id}, socket) do
-    {:noreply, put_new_driver(socket, driver_id)}
+    {:reply, :ok, put_new_driver(socket, driver_id)}
   end
 
   def handle_in("driver_disconnected", %{"driver_id" => driver_id}, socket) do
     Endpoint.unsubscribe("driver:#{driver_id}")
-    {:noreply, socket}
+    {:reply, :ok, socket}
   end
 
   def handle_in("remove_order_from_driver", %{"restaurant_id" => restaurant_id, "order_id" => order_id, "driver_id" => driver_id}, socket) do

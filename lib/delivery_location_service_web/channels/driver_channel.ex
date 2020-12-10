@@ -50,7 +50,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     Logger.info("Socket topic is #{socket.topic}")
 
 
-    Endpoint.subscribe("admins:#{socket.assigns.customer_company}")
+    # Endpoint.subscribe("admins:#{socket.assigns.customer_company}")
     Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "driver_connected", %{"driver_id" => socket.assigns.driver_id})
 
     # updated_coordinates =
