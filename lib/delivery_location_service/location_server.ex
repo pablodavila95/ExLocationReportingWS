@@ -92,9 +92,11 @@ defmodule DeliveryLocationService.LocationServer do
     {:reply, view_data(location_data), location_data, @timeout}
   end
 
-  def handle_cast({:update_coordinates, %{} = new_coordinates}, location_data) do
+  def handle_cast({:update_coordinates, %{"lat" => lat, "long" => long, "order_id" => order_id, "restaurant_id" => restaurant_id}}, location_data) do
     new_location_data =
-      Location.update_coordinates(location_data, new_coordinates, Time.utc_now())
+      Location.update_coordinates(location_data, %{lat: lat, long: long}, Time.utc_now())
+      |> Location.update_restaurant(restaurant_id, Time.utc_now())
+      |> Location.update_order(order_id, Time.utc_now())
 
     :ets.insert(:locations_table, {location_data_driver_id(), new_location_data})
 

@@ -84,11 +84,11 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   end
 
   def handle_in("update_location", new_coordinates, socket) do
-    %{"lat" => lat, "long" => long} = new_coordinates
-    Logger.info("Updating location")
+    %{"lat" => lat, "long" => long, "restaurant_id" => restaurant_id, "order_id" => order_id} = new_coordinates
+    Logger.info("Updating location and current order")
 
     "driver:" <> driver_id = socket.topic
-    LocationServer.update_coordinates(driver_id, %{lat: lat, long: long})
+    LocationServer.update_coordinates(driver_id, %{lat: lat, long: long, restaurant_id: restaurant_id, order_id: order_id})
 
     current_state =
       LocationServer.location_data_pid(driver_id)
