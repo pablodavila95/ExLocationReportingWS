@@ -45,6 +45,10 @@ defmodule DeliveryLocationService.LocationServer do
     GenServer.call(via_tuple(driver_id), :view)
   end
 
+  def update_all(driver_id, new_coordinates) do
+    GenServer.cast(via_tuple(driver_id), {:update_all, new_coordinates})
+  end
+
   def update_coordinates(driver_id, new_coordinates) do
     GenServer.cast(via_tuple(driver_id), {:update_coordinates, new_coordinates})
   end
@@ -92,11 +96,21 @@ defmodule DeliveryLocationService.LocationServer do
     {:reply, view_data(location_data), location_data, @timeout}
   end
 
-  def handle_cast({:update_coordinates, %{"lat" => lat, "long" => long, "order_id" => order_id, "restaurant_id" => restaurant_id}}, location_data) do
+  def handle_cast({:update_all, %{"lat" => lat, "long" => long, "order_id" => order_id, "restaurant_id" => restaurant_id}}, location_data) do
     new_location_data =
       Location.update_coordinates(location_data, %{lat: lat, long: long}, Time.utc_now())
       |> Location.update_restaurant(restaurant_id, Time.utc_now())
       |> Location.update_order(order_id, Time.utc_now())
+
+    :ets.insert(:locations_table, {location_data_driver_id(), new_location_data})
+
+    # {:noreply, new_location_data}
+    {:noreply, new_location_data, @timeout}
+  end
+
+  def handle_cast({:update_coordinates, %{"lat" => lat, "long" => long}}, location_data) do
+    new_location_data =
+      Location.update_coordinates(location_data, %{lat: lat, long: long}, Time.utc_now())
 
     :ets.insert(:locations_table, {location_data_driver_id(), new_location_data})
 

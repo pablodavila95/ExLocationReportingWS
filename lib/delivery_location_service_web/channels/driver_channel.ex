@@ -83,12 +83,47 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     {:noreply, socket}
   end
 
-  def handle_in("update_location", new_coordinates, socket) do
-    %{"lat" => lat, "long" => long, "restaurant_id" => restaurant_id, "order_id" => order_id} = new_coordinates
+  def handle_in("update_location", %{"lat" => lat, "long" => long, "restaurant_id" => restaurant_id, "order_id" => order_id} = new_coordinates, socket) do
     Logger.info("Updating location and current order")
 
     "driver:" <> driver_id = socket.topic
-    LocationServer.update_coordinates(driver_id, %{lat: lat, long: long, restaurant_id: restaurant_id, order_id: order_id})
+    LocationServer.update_all(driver_id, %{lat: lat, long: long, restaurant_id: restaurant_id, order_id: order_id})
+
+    current_state =
+      LocationServer.location_data_pid(driver_id)
+      |> :sys.get_state()
+
+    Logger.info("Driver state updated")
+
+    current_restaurant_id =
+      current_state
+      |> Map.get(:restaurant_id)
+
+    if current_restaurant_id != nil do
+      Logger.info("Will send to restaurant #{current_restaurant_id}")
+
+      Endpoint.broadcast!(
+        "restaurant:#{current_restaurant_id}",
+        "driver_update",
+        Map.from_struct(current_state)
+      )
+    else
+      Endpoint.broadcast!("restaurant:#{current_restaurant_id}", "finished_delivering", %{
+        driver_id: driver_id,
+        })
+    end
+
+    push_data_to_admins(driver_id, socket)
+
+    {:noreply, socket}
+  end
+
+  def handle_in("update_location", %{"lat" => lat, "long" => long} = new_coordinates, socket) do
+
+    Logger.info("Updating location and current order")
+
+    "driver:" <> driver_id = socket.topic
+    LocationServer.update_coordinates(driver_id, %{lat: lat, long: long})
 
     current_state =
       LocationServer.location_data_pid(driver_id)
