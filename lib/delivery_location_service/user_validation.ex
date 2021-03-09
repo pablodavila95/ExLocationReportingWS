@@ -1,4 +1,9 @@
 defmodule DeliveryLocationService.UserValidation do
+  @moduledoc """
+  This module makes a request to a central backend server to verify
+  that a user is allowed to enter the socket/channel.
+  """
+
   require Logger
 
   defp backend_verify do
