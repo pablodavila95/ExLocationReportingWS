@@ -1,8 +1,16 @@
 defmodule DeliveryLocationService.Location do
   @moduledoc """
-  Defines the Location struct and its methods to update it. It's being used by the LocationServer.
+  In reality, the Location module (and all its related OTP modules) are really a driver state which
+  includes the current restaurant they are delivering to, the last location they reported and current order.
+
+  This particular module relates to the data structure %Location{} and functions that modify it.
   """
-  defstruct driver_id: nil, restaurant_id: nil, coordinates: %{}, timestamp: nil, current_order: nil
+  defstruct driver_id: nil,
+            restaurant_id: nil,
+            coordinates: %{},
+            timestamp: nil,
+            current_order: nil
+
   alias DeliveryLocationService.Location
 
   def new(driver_id, restaurant_id, coordinates, timestamp, current_order) do
