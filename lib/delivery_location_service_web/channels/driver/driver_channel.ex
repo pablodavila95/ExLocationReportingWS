@@ -4,16 +4,13 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   It also notifies the admin and any subscribed restaurant (it also forces subscription when accepting orders or the opposite)
   """
   use DeliveryLocationServiceWeb, :channel
+  alias DeliveryLocationService.Location
+  alias DeliveryLocationService.Locations
   alias DeliveryLocationService.LocationServer
   alias DeliveryLocationService.LocationSupervisor
-  alias DeliveryLocationService.Locations
-  alias DeliveryLocationService.Location
   alias DeliveryLocationServiceWeb.Endpoint
   alias DeliveryLocationServiceWeb.Presence
   require Logger
-
-  # TODO don't allow input of empty locations
-  # TODO warn admins of large variations between locations
 
   def join("driver:" <> driver_id, %{"lat" => lat, "long" => long}, socket) do
     Logger.info(inspect(Integer.to_string(socket.assigns.driver_id)))
@@ -24,7 +21,6 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
         pid when is_pid(pid) ->
           Logger.info("GS already existed for driver #{driver_id}")
 
-          # %{coordinates: %{"lat" => existing_lat, "long" => existing_long}} = get_state(driver_id)
           existing_lat = Map.get(Map.get(get_state(driver_id), :coordinates), :lat)
           existing_long = Map.get(Map.get(get_state(driver_id), :coordinates), :long)
           LocationServer.update_order(driver_id, Map.get(get_state(driver_id), :current_order))

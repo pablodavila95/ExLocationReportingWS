@@ -1,4 +1,10 @@
 defmodule DeliveryLocationServiceWeb.DriverNotifications do
+  @moduledoc """
+  This channel allows drivers to receive notifications. To use any frontend app can connect
+  and send "notify_drivers" messages to this channel.
+  Keep in mind that everyone will be able to join and get notifications (if they are listening for it)
+  """
+
   use DeliveryLocationServiceWeb, :channel
   require Logger
 
