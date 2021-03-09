@@ -5,7 +5,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   """
   use DeliveryLocationServiceWeb, :channel
   alias DeliveryLocationService.LocationServer
-  alias DeliveryLocationService.LocationsHelper
+  alias DeliveryLocationService.Locations
   alias DeliveryLocationServiceWeb.Endpoint
   alias DeliveryLocationServiceWeb.Presence
   require Logger
@@ -69,7 +69,7 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     {:ok, _} =
       Presence.track(socket, "driver:#{driver_id}", %{
         online_at: inspect(Time.utc_now()),
-        is_delivering: inspect(LocationsHelper.is_delivering?(driver_id))
+        is_delivering: inspect(Locations.is_delivering?(driver_id))
       })
 
     Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "presence_state", Presence.list(socket))

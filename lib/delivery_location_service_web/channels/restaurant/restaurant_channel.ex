@@ -4,7 +4,7 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   """
   use DeliveryLocationServiceWeb, :channel
   alias DeliveryLocationService.Location
-  alias DeliveryLocationService.LocationsHelper
+  alias DeliveryLocationService.Locations
   alias DeliveryLocationServiceWeb.Endpoint
   require Logger
 
@@ -21,7 +21,7 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   def handle_info({:after_join}, socket) do
     "restaurant:" <> restaurant_id = socket.topic
 
-    LocationsHelper.get_orders_for(restaurant_id)
+    Locations.get_orders_for(restaurant_id)
     |> Enum.map(fn driver_data -> driver_data.driver_id end)
     |> Enum.each(fn driver_id ->
       Endpoint.broadcast!("driver:#{driver_id}", "subscription_request", %{
@@ -43,7 +43,7 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   end
 
   def handle_in("send_map_updates_and_unsubscribe_from_driver", %{"driver_id" => driver_id}, socket) do
-    current_orders = Map.from_struct(LocationsHelper.get_orders_for(socket.assigns.restaurant_id))
+    current_orders = Map.from_struct(Locations.get_orders_for(socket.assigns.restaurant_id))
     push(socket, "refresh_map", current_orders)
     Endpoint.unsubscribe("driver:#{driver_id}")
     {:reply, :ok, socket}
@@ -52,13 +52,13 @@ defmodule DeliveryLocationServiceWeb.RestaurantChannel do
   def handle_in("remove_order_from_driver_process", %{"driver_id" => driver_id}, socket) do
     Logger.info("Restaurant is deleting order from the driver GenServer process #{driver_id}")
 
-    LocationsHelper.reset_order(driver_id)
-    LocationsHelper.reset_restaurant(driver_id)
+    Locations.reset_order(driver_id)
+    Locations.reset_restaurant(driver_id)
     {:noreply, socket}
   end
 
   def handle_in("finished_delivering", %{"driver_id" => driver_id}, socket) do
-    # current_orders = Map.from_struct(LocationsHelper.get_orders_for(socket.assigns.restaurant_id))
+    # current_orders = Map.from_struct(Locations.get_orders_for(socket.assigns.restaurant_id))
     # push(socket, "refresh_map", current_orders)
 
     Endpoint.unsubscribe("driver:#{driver_id}")
