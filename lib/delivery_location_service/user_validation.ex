@@ -1,8 +1,13 @@
 defmodule DeliveryLocationService.UserValidation do
+  @moduledoc """
+  This module makes a request to a central backend server to verify
+  that a user is allowed to enter the socket/channel.
+  """
+
   require Logger
 
   defp backend_verify do
-    api_url = System.get_env("API_URL") || "https://delivery.aztlansoft.com"
+    api_url = System.get_env("API_URL")
     api_url <> "/verify/token"
   end
 
@@ -35,9 +40,7 @@ defmodule DeliveryLocationService.UserValidation do
     end
   end
 
-
   def user_json(token) do
-    # TODO fix validation. A reply might be :ok but not have the stuff I need
     case Peppermint.get(backend_verify(), params: %{cookie2: token}) do
       {:ok, %{status: 200, headers: _headers, body: body}} ->
         %{"data" => data} = Jason.decode!(body)

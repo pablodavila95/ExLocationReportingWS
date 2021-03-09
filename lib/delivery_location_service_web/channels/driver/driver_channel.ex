@@ -4,14 +4,13 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
   It also notifies the admin and any subscribed restaurant (it also forces subscription when accepting orders or the opposite)
   """
   use DeliveryLocationServiceWeb, :channel
+  alias DeliveryLocationService.Location
+  alias DeliveryLocationService.Locations
   alias DeliveryLocationService.LocationServer
-  alias DeliveryLocationService.LocationsHelper
+  alias DeliveryLocationService.LocationSupervisor
   alias DeliveryLocationServiceWeb.Endpoint
   alias DeliveryLocationServiceWeb.Presence
   require Logger
-
-  # TODO don't allow input of empty locations
-  # TODO warn admins of large variations between locations
 
   def join("driver:" <> driver_id, %{"lat" => lat, "long" => long}, socket) do
     Logger.info(inspect(Integer.to_string(socket.assigns.driver_id)))
@@ -22,7 +21,6 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
         pid when is_pid(pid) ->
           Logger.info("GS already existed for driver #{driver_id}")
 
-          # %{coordinates: %{"lat" => existing_lat, "long" => existing_long}} = get_state(driver_id)
           existing_lat = Map.get(Map.get(get_state(driver_id), :coordinates), :lat)
           existing_long = Map.get(Map.get(get_state(driver_id), :coordinates), :long)
           LocationServer.update_order(driver_id, Map.get(get_state(driver_id), :current_order))
@@ -33,7 +31,15 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
 
         nil ->
           Logger.info("Created a new GS for #{driver_id}")
-          LocationServer.create(driver_id)
+
+          LocationSupervisor.start_location(%Location{
+            driver_id: driver_id,
+            restaurant_id: nil,
+            coordinates: %{lat: nil, long: nil},
+            timestamp: Time.utc_now(),
+            current_order: nil
+          })
+
           # Logger.info("Using default coordinates from frontend: {lat: #{lat}, long: #{long}")
           send(self(), {:after_join, driver_id, %{"lat" => lat, "long" => long}})
           {:ok, socket}
@@ -49,9 +55,10 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     LocationServer.update_coordinates(driver_id, coordinates)
     Logger.info("Socket topic is #{socket.topic}")
 
-
     # Endpoint.subscribe("admins:#{socket.assigns.customer_company}")
-    Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "driver_connected", %{"driver_id" => socket.assigns.driver_id})
+    Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "driver_connected", %{
+      "driver_id" => socket.assigns.driver_id
+    })
 
     # updated_coordinates =
     #   LocationServer.location_data_pid(driver_id) |> :sys.get_state() |> Map.get(:coordinates)
@@ -61,7 +68,9 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
       message: "Connected to Channel successfully"
     })
 
-    Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "logs", %{message: "Driver #{driver_id} just connected"})
+    Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "logs", %{
+      message: "Driver #{driver_id} just connected"
+    })
 
     push_data_to_admins(driver_id, socket)
 
@@ -69,10 +78,14 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
     {:ok, _} =
       Presence.track(socket, "driver:#{driver_id}", %{
         online_at: inspect(Time.utc_now()),
-        is_delivering: inspect(LocationsHelper.is_delivering?(driver_id))
+        is_delivering: inspect(Locations.is_delivering?(driver_id))
       })
 
-    Endpoint.broadcast!("admins:#{socket.assigns.customer_company}", "presence_state", Presence.list(socket))
+    Endpoint.broadcast!(
+      "admins:#{socket.assigns.customer_company}",
+      "presence_state",
+      Presence.list(socket)
+    )
 
     Logger.info("A driver connected")
     {:noreply, socket}
@@ -110,8 +123,8 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
       )
     else
       Endpoint.broadcast!("restaurant:#{current_restaurant_id}", "finished_delivering", %{
-        driver_id: driver_id,
-        })
+        driver_id: driver_id
+      })
     end
 
     push_data_to_admins(driver_id, socket)
@@ -142,7 +155,6 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
         %{"restaurant_id" => restaurant_id_client, "order_id" => order_id_client},
         socket
       ) do
-
     Logger.info("Order is finished. Removing...")
     "driver:" <> driver_id = socket.topic
 
@@ -151,10 +163,10 @@ defmodule DeliveryLocationServiceWeb.DriverChannel do
 
     if restaurant_id_client == restaurant_id_server and order_id_client == order_id_server do
       Endpoint.broadcast!("restaurant:#{restaurant_id_server}", "finished_delivering", %{
-        driver_id: driver_id,
+        driver_id: driver_id
         # order_id: order_id_server
-        })
-      end
+      })
+    end
 
     LocationServer.update_restaurant(driver_id, nil)
     LocationServer.update_order(driver_id, nil)

@@ -4,11 +4,11 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
   Any update from the drivers gets sent to the channel.
   """
   use DeliveryLocationServiceWeb, :channel
-  alias DeliveryLocationService.LocationsHelper
+  alias DeliveryLocationService.Locations
   alias DeliveryLocationServiceWeb.Endpoint
   require Logger
 
-  def join("admins:" <> customer_company, %{"adminID" => admin_id}, socket) do
+  def join("admins:" <> _customer_company, %{"adminID" => admin_id}, socket) do
 
     Logger.info(inspect(socket.assigns.admin_id))
     Logger.info(inspect(admin_id))
@@ -23,7 +23,7 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
   end
 
   def handle_info({:after_join}, socket) do
-    LocationsHelper.get_orders_for_all()
+    Locations.get_orders_for_all()
     |> Enum.each(fn driver_data -> push(socket, "driver_update", Map.from_struct(driver_data)) end)
 
     {:noreply, socket}
@@ -46,8 +46,8 @@ defmodule DeliveryLocationServiceWeb.AdminChannel do
   def handle_in("remove_order_from_driver_process", %{"driver_id" => driver_id}, socket) do
     Logger.info("Deleting order from the driver GenServer process #{driver_id}")
 
-    LocationsHelper.reset_order(driver_id)
-    LocationsHelper.reset_restaurant(driver_id)
+    Locations.reset_order(driver_id)
+    Locations.reset_restaurant(driver_id)
     {:noreply, socket}
   end
 
