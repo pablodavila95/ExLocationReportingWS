@@ -21,7 +21,6 @@ defmodule DeliveryLocationService.Application do
     ]
 
     :ets.new(:locations_table, [:public, :named_table])
-    #:ets.new(:sessions, [:public, :named_table])
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

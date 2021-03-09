@@ -15,22 +15,6 @@ defmodule DeliveryLocationService.LocationServer do
 
   @timeout :timer.minutes(15)
 
-  def create(driver_id) do
-    case location_data_pid(driver_id) do
-      nil ->
-        DeliveryLocationService.LocationSupervisor.start_location(%Location{
-          driver_id: driver_id,
-          restaurant_id: nil,
-          coordinates: %{lat: nil, long: nil},
-          timestamp: Time.utc_now(),
-          current_order: nil
-        })
-
-      _driver_location ->
-        {:error, :user_already_registered}
-    end
-  end
-
   @spec start_link(DeliveryLocationService.Location.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(%Location{} = location_data) do
     GenServer.start_link(
