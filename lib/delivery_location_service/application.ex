@@ -20,7 +20,7 @@ defmodule DeliveryLocationService.Application do
       # {DeliveryLocationService.Worker, arg}
     ]
 
-    :ets.new(:locations_table, [:public, :named_table])
+    :ets.new(:locations_table, [:public, :named_table, :set, read_concurrency: true, write_concurrency: true])
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
