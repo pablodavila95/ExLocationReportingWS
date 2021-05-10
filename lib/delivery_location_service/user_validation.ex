@@ -41,7 +41,7 @@ defmodule DeliveryLocationService.UserValidation do
   end
 
   def user_json(token) do
-    case Peppermint.get(backend_verify(), params: %{cookie2: token}) do
+    case Peppermint.get(backend_verify(), params: %{cookie2: token}, headers: [{"Authorization", "websocket:elixir:0.3"}]) do
       {:ok, %{status: 200, headers: _headers, body: body}} ->
         %{"data" => data} = Jason.decode!(body)
 
